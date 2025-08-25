@@ -1,0 +1,28 @@
+%define _rpmdir %{_topdir}/
+%define _build_name_fmt %%{NAME}.rpm
+#_build_name_fmt %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
+
+Name:           Pixet
+Version:        #PIXET_VERSION#
+Release:        1%{?dist}
+Summary:        DAQ Software for ADVACAM Cameras
+
+License:        Proprietary
+URL:            https://www.advacam.com/
+BuildRoot:      %{_topdir}/BUILDROOT/
+Requires:       libxcb-cursor0, liblua5.4-0
+
+%description
+Pixet software is a DAQ software for ADVACAM Cameras
+
+
+%files
+/opt/pixet/*
+/usr/share/applications/pixet.desktop
+
+%post
+cd /opt/pixet
+bash /opt/pixet/install_driver_rules.sh
+
+%changelog
+

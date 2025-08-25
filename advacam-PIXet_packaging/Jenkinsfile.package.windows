@@ -1,0 +1,115 @@
+#!groovy
+
+def pixetBuildsDir = "M:\\Software\\Builds\\pixet\\releases"
+def customersDir = "M:\\Software\\Public\\pixet\\customers"
+def pixetVersion = "0.0.0"
+
+pipeline {
+  agent {
+    label 'windows' 
+  }
+
+  options {
+    timeout(time: 15, unit: 'MINUTES')
+    timestamps()
+    ansiColor("xterm")
+  }
+
+  parameters {
+    string(name: 'customerName', 
+      defaultValue: '', 
+      description: 'Name of the customer.\nInternal licence with no explicit configuration files will be used if empty.\nValue also determine the folder the configuration and factory configuration will be copied from and the result will be placed to.\nPlease place configuration files to \"nox2/advacam/Software/pixet/customers/CustomerName/_in\" folder, the built packages will be created in \"nox2/advacam/Software/pixet/customers/CustomerName\" folder.')  
+    booleanParam(name: 'api', 
+      defaultValue: true,
+      description: "Add also API to the package.")
+    booleanParam(name: 'edu', 
+      defaultValue: false,
+      description: "Create EDU version of the package.")
+   }
+
+  environment {
+    TERM = 'xterm'
+  }
+
+  stages {
+
+    stage ('Copying files') {
+      steps{
+        script{
+          bat "C:\\Users\\Advacam\\netuse.bat"
+          def lastPixetDir = powershell (script: "Get-ChildItem -Path ${pixetBuildsDir} -Directory | Sort-Object Name -Descending | Select-Object -First 1 | Select-Object -ExpandProperty Name", returnStdout: true).trim()
+          def lastPixetBuild = "${pixetBuildsDir}\\${lastPixetDir}"
+          echo "Last Pixet Build: ${lastPixetDir}"
+          bat """
+            if not exist _build\\devices_configs mkdir _build\\devices_configs
+            copy /Y ${lastPixetBuild}\\*Win.zip _build        
+            """
+          pixetVersion = powershell(script: """Get-ChildItem -Filter "_build\\PIXet_Pro*Win.zip" | ForEach-Object { if (\$_.Name -match '(\\d+\\.\\d+\\.\\d+)') { \$matches[0] } }""", returnStdout: true).trim()
+          if ( params.customerName.trim().length() ){
+            def sourceDir = "${customersDir}\\${params.customerName.trim()}\\_in"
+            bat """
+              xcopy /Y /S /E "${sourceDir}\\*" _build\\devices_configs
+              """
+          }
+        }
+      }
+    }
+  
+    stage ('Creating packages') {
+      steps{
+        script{
+          def workspacePath = env.WORKSPACE
+          def packagerParams = "inno zip"
+          if (params.edu) {
+            packagerParams = packagerParams + " edu"
+          }
+          if (params.api) {
+            packagerParams = packagerParams + " api"
+          }
+          if (params.customerName.trim().length()) {
+            packagerParams = packagerParams + " -lic \"" + params.customerName.trim() + "\"";
+          }          
+          bat "package_windows.bat -pversion ${pixetVersion} ${packagerParams}"    
+        }
+      }
+    }
+
+    stage ('Deploying to nox2') {
+      steps{
+        script{
+          def lastPixetDir = powershell (script: "Get-ChildItem -Path ${pixetBuildsDir} -Directory | Sort-Object Name -Descending | Select-Object -First 1 | Select-Object -ExpandProperty Name", returnStdout: true).trim()
+          def destinationDir = "${pixetBuildsDir}\\${lastPixetDir}"
+          if ( params.customerName.trim().length() ){
+            destinationDir = "${customersDir}\\${params.customerName.trim()}"
+          }
+          def VER = params.edu ? "EDU" : "Pro"
+          bat """
+            if not exist "${destinationDir}" mkdir "${destinationDir}"
+            del /Q "${destinationDir}\\PIXet_${VER}_${pixetVersion}_Window_x86_64.zip"
+            del /Q "${destinationDir}\\PIXet_${VER}_${pixetVersion}_Windows_x86_64.exe"
+            copy /Y _build\\PixetWin64.zip "${destinationDir}\\PIXet_${VER}_${pixetVersion}_Window_x86_64.zip"
+            copy /Y _build\\PixetWin64\\setupX64.exe "${destinationDir}\\PIXet_${VER}_${pixetVersion}_Windows_x86_64.exe"
+            """
+          if (params.api) {
+            bat """
+              del /Q "${destinationDir}\\API_PIXet_${VER}_${pixetVersion}_Windows_x86_64.zip"
+              copy /Y _build\\PixetAPIWin64.zip "${destinationDir}\\API_PIXet_${VER}_${pixetVersion}_Windows_x86_64.zip"
+              rem del /Q "${destinationDir}\\API_PIXet_${VER}_${pixetVersion}_Windows_x86.zip"
+              rem copy /Y _build\\PixetAPIWin32.zip "${destinationDir}\\API_PIXet_${VER}_${pixetVersion}_Windows_x86.zip"
+              """            
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    unsuccessful {
+      slackSend channel:  "#jenkins", message: "PIXet packaging for windows failed.\n <${currentBuild.absoluteUrl}|${currentBuild.absoluteUrl}>"
+    }
+    always {
+      cleanWs()
+    }
+  }    
+
+}

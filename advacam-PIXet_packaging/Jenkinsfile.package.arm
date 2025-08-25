@@ -1,0 +1,86 @@
+#!groovy
+
+def pixetBuildsDir = "/media/nox2/Software/Builds/pixet/releases"
+def customersDir = "/media/nox2/Software/Public/pixet/customers/"
+def pixetVersion = "0.0.0"
+
+pipeline {
+  agent {
+    label 'rapsberry01' 
+  }
+
+  options {
+    timeout(time: 15, unit: 'MINUTES')
+    timestamps()
+    ansiColor("xterm")
+  }
+
+  parameters {
+    string(name: 'customerName', 
+      defaultValue: '', 
+      description: 'Name of the customer.\nInternal licence with no explicit configuration files will be used if empty.\nValue also determine the folder the configuration and factory configuration will be copied from and the result will be placed to.\nPlease place configuration files to \"nox2/advacam/Software/pixet/customers/CustomerName/_in\" folder, the built packages will be created in \"nox2/advacam/Software/pixet/customers/CustomerName\" folder.')  
+   }
+
+  environment {
+    TERM = 'xterm'
+  }
+
+  stages {
+
+    stage ('Copying files') {
+      steps{
+        script{
+
+          def lastPixetBuild = sh (script: """ls -d ${pixetBuildsDir}/*/ | sort -r | head -1""", returnStdout: true).trim()
+          sh """
+            mkdir -p _build/devices_configs
+            if [ "${lastPixetBuild}/*arm64.zip" ]; then 
+               cp ${lastPixetBuild}/*arm64.zip _build
+            fi
+            """
+          pixetVersion = sh( script: """ls _build/*64.zip | grep -o \'[0-9]*\\.[0-9]*\\.[0-9]*\'""", returnStdout: true).trim()
+        }
+      }
+    }
+  
+    stage ('Creating packages') {
+      steps{
+        script{
+          def workspacePath = env.WORKSPACE
+          def packagerParams = "api"
+          sh """
+             docker run --rm -v "${workspacePath}":/opt/PixetPackage:Z -t ubuntu20.04dev_64 bash -c "cd /opt/PixetPackage; bash ./package_arm.sh arm64 -pversion ${pixetVersion} ${packagerParams}"
+             """    
+        }
+      }
+    }
+
+    stage ('Deploying to nox2') {
+      steps{
+        script{
+          def destinationDir = sh (script: """ls -d ${pixetBuildsDir}/*/ | sort -r | head -1""", returnStdout: true).trim()         
+          if ( params.customerName.trim().length() ){
+            destinationDir = customersDir + "/" + params.customerName.trim().replaceAll(" ","\\\\ ")
+          }
+          def VER = params.edu ? "EDU" : "Pro"
+          sh """
+            mkdir -p ${destinationDir} 
+            rm -f ${destinationDir}/API_PIXet_${VER}_${pixetVersion}_ARM64.tar.gz
+            cp _build/pixetAPI_arm64.tar.gz ${destinationDir}/API_PIXet_${VER}_${pixetVersion}_ARM64.tar.gz
+            """            
+        }
+      }
+    }
+
+  }
+
+  post {
+    unsuccessful {
+      slackSend channel:  "#jenkins", message: "PIXet packaging for arm failed.\n <${currentBuild.absoluteUrl}|${currentBuild.absoluteUrl}>"
+    }
+    always {
+      cleanWs()
+    }
+  }    
+
+}

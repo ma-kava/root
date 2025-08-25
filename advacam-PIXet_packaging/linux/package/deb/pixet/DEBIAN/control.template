@@ -1,0 +1,7 @@
+Package: pixet
+Architecture: amd64
+Maintainer: ADVACAM <info@advacam.com>
+Depends: debconf (>= 0.5.00), rsync, libxcb-cursor0, liblua5.4-0
+Priority: optional
+Version: #PIXET_VERSION#
+Description: Pixet is a DAQ software for ADVACAM Cameras.

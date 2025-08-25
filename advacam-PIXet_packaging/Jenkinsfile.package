@@ -1,0 +1,97 @@
+#!groovy
+
+
+pipeline {
+  agent {
+    label 'linux01' 
+  }
+
+  options {
+    timeout(time: 30, unit: 'MINUTES')
+    timestamps()
+    ansiColor("xterm")
+  }
+
+  parameters {
+    string(name: 'customerName', 
+      defaultValue: '', 
+      description: 'Name of the customer.\nInternal licence with no explicit configuration files will be used if empty.\nValue also determine the folder the configuration and factory configuration will be copied from and the result will be placed to.\nPlease create folder nox2/advacam/Software/Pixet/customers/customerName and place configuration files to folder \"in\" inside of this direcotry.')  
+    booleanParam(name: 'api', 
+      defaultValue: true,
+      description: "Add also API to the package.")
+    booleanParam(name: 'edu', 
+      defaultValue: false,
+      description: "Create EDU version of the package.")
+   }
+
+  environment {
+    TERM = 'xterm'
+  }
+
+  stages {
+
+    stage ('Sub Jobs') {
+      parallel{
+        stage ('Package Windows Pixet'){
+          steps{
+            script{
+              build job: "Package Windows Pixet", 
+                parameters: [ 
+                  string( name: 'customerName', value: params.customerName ),
+                  booleanParam( name: 'api', value: params.api ),
+                  booleanParam( name: 'edu', value: params.edu ),
+                ]
+            }
+          }
+        }
+        stage ('Package Linux Pixet'){
+          steps{
+            script{
+              build job: "Package Linux Pixet",
+                parameters: [ 
+                  string( name: 'customerName', value: params.customerName ),
+                  booleanParam( name: 'api', value: params.api ),
+                  booleanParam( name: 'edu', value: params.edu ),
+                ]
+            }
+          }
+        }
+        stage ('Package Mac Pixet'){
+          steps{
+            script{
+              build job: "Package Mac Pixet",
+                parameters: [ 
+                  string( name: 'customerName', value: params.customerName ),
+                  booleanParam( name: 'api', value: params.api ),
+                  booleanParam( name: 'edu', value: params.edu ),
+                ]
+            }
+          }
+        }
+        stage ('Package Arm Pixet'){
+          steps{
+            script{
+              build job: "Package Arm Pixet",
+                parameters: [ 
+                  string( name: 'customerName', value: params.customerName ),
+                ]
+            }
+          }
+        }
+      }
+    }
+      
+  }
+  
+
+  post {
+    unsuccessful {
+      slackSend channel:  "#jenkins", message: "PIXet packaging failed.\n <${currentBuild.absoluteUrl}|${currentBuild.absoluteUrl}>"
+    }
+    always {
+      cleanWs()
+    }
+  }    
+
+}
+

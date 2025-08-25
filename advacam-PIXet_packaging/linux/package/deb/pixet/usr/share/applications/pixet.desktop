@@ -1,0 +1,18 @@
+[Desktop Entry]
+Name=Pixet
+GenericName=Pixet Pro
+X-GNOME-FullName=Pixet Pro
+Comment=Acquisition software for ADVACAM cameras
+Keywords=daq;
+Exec=/opt/pixet/pixet.sh
+Terminal=false
+Type=Application
+StartupNotify=true
+Icon=/opt/pixet/pixet.png
+Categories=GNOME;Accessories;
+X-GNOME-Bugzilla-Bugzilla=GNOME
+X-GNOME-Bugzilla-Product=pixet
+X-GNOME-Bugzilla-Component=general
+X-GNOME-Bugzilla-Version=1.5
+X-Ubuntu-Gettext-Domain=pixet
+X-AppStream-Ignore=true

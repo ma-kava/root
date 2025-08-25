@@ -1,0 +1,171 @@
+#!groovy
+
+def pixetBuildsDir = "Software/Builds/pixet/releases"
+def customersDir = "Software/Public/pixet/customers"
+def pixetVersion = "0.0.0"
+
+pipeline {
+  agent {
+    label 'mac_x64' 
+  }
+
+  options {
+    timeout(time: 15, unit: 'MINUTES')
+    timestamps()
+    ansiColor("xterm")
+  }
+
+  parameters {
+    string(name: 'customerName', 
+      defaultValue: '', 
+      description: 'Name of the customer.\nInternal licence with no explicit configuration files will be used if empty.\nValue also determine the folder the configuration and factory configuration will be copied from and the result will be placed to.\nPlease place configuration files to \"nox2/advacam/Software/pixet/customers/CustomerName/_in\" folder, the built packages will be created in \"nox2/advacam/Software/pixet/customers/CustomerName\" folder.')  
+    booleanParam(name: 'api', 
+      defaultValue: true,
+      description: "Add also API to the package.")
+    booleanParam(name: 'edu', 
+      defaultValue: false,
+      description: "Create EDU version of the package.")
+   }
+
+  environment {
+    TERM = 'xterm'
+  }
+
+  stages {
+
+    stage ('Copying files') {
+      steps{
+        script{
+
+          withCredentials([usernamePassword(credentialsId: 'swbuild_to_nox2', usernameVariable: 'SFTP_USER', passwordVariable: 'SFTP_PASS')]) {
+
+            sh """
+                /usr/local/bin/sshpass -p "\$SFTP_PASS" sftp -o StrictHostKeyChecking=no \$SFTP_USER@nox2 << EOF > directory_listing.txt
+                cd ${pixetBuildsDir}
+                ls -la
+                bye
+                EOF
+            """
+            
+            def lastPixetBuild = sh(script: """
+                cat directory_listing.txt | grep '^d' | awk '{print \$NF}' | sort | tail -1
+            """, returnStdout: true).trim()
+            
+            echo "Build found: ${lastPixetBuild}"
+            
+            sh "rm directory_listing.txt"
+
+            sh """               
+              mkdir -p _build/devices_configs
+            """
+
+            sh """
+                cd _build
+                /usr/local/bin/sshpass -p "\$SFTP_PASS" sftp -o StrictHostKeyChecking=no \$SFTP_USER@nox2 << EOF
+                cd ${pixetBuildsDir}/${lastPixetBuild}
+                get *Mac.zip
+                bye
+               EOF
+               cd ..
+            """
+          }
+
+          pixetVersion = sh( script: """ls _build/PIXet_Pro*Mac.zip | grep -o \'[0-9]*\\.[0-9]*\\.[0-9]*\'""", returnStdout: true).trim()
+
+          if ( params.customerName.trim().length() ){
+            def sourceDir = customersDir + "/" + params.customerName.trim().replaceAll(" ","\\\\ ") + "/_in"
+            sh """
+              if [ "\$(ls -A ${sourceDir})"  ]; then
+                 cp ${sourceDir}/* _build/devices_configs
+              fi
+              """          
+          }
+        }
+      }
+    }
+  
+    stage ('Creating packages') {
+      steps{
+        script{
+          def workspacePath = env.WORKSPACE
+          def packagerParams = "dmg"
+          if (params.edu) {
+            packagerParams = packagerParams + " edu"
+          }
+          if (params.api) {
+            packagerParams = packagerParams + " api"
+          }
+          if (params.customerName.trim().length()) {
+            packagerParams = packagerParams + " -lic ";
+          }
+          sh """
+             ./package_mac.sh -pversion ${pixetVersion} ${packagerParams} "${params.customerName.trim()}"
+             """    
+        }
+      }
+    }
+
+    stage ('Deploying to nox2') {
+      steps{
+        script{
+
+          withCredentials([usernamePassword(credentialsId: 'swbuild_to_nox2', usernameVariable: 'SFTP_USER', passwordVariable: 'SFTP_PASS')]) {
+            
+            sh """
+                /usr/local/bin/sshpass -p "\$SFTP_PASS" sftp -o StrictHostKeyChecking=no \$SFTP_USER@nox2 << EOF > directory_listing.txt
+                cd ${pixetBuildsDir}
+                ls -la
+                bye
+                EOF
+            """
+            
+            def destinationDir = sh(script: """
+                cat directory_listing.txt | grep '^d' | awk '{print \$NF}' | sort | tail -1
+            """, returnStdout: true).trim()
+            
+            echo "Build found: ${destinationDir}"
+            
+            sh "rm directory_listing.txt"
+
+            if ( params.customerName.trim().length() ){
+              destinationDir = customersDir + "/" + params.customerName.trim().replaceAll(" ","\\\\ ")
+            } else {
+              destinationDir = pixetBuildsDir + "/" + destinationDir
+            }
+
+            def VER = params.edu ? "EDU" : "Pro"
+            
+            sh """
+                /usr/local/bin/sshpass -p "\$SFTP_PASS" sftp -o StrictHostKeyChecking=no \$SFTP_USER@nox2 << EOF
+                rm ${destinationDir}/PIXet_${VER}_${pixetVersion}_Mac.dmg
+                put _build/*.dmg ${destinationDir}/PIXet_${VER}_${pixetVersion}_Mac.dmg
+                bye
+                EOF
+            """          
+
+            if (params.api) {
+              sh """
+                  /usr/local/bin/sshpass -p "\$SFTP_PASS" sftp -o StrictHostKeyChecking=no \$SFTP_USER@nox2 << EOF
+                  rm ${destinationDir}/API_PIXet_${VER}_${pixetVersion}_Mac.zip
+                  put _build/pixetAPI.zip ${destinationDir}/API_PIXet_${VER}_${pixetVersion}_Mac.zip
+                  bye
+                  EOF
+              """ 
+            }         
+          }
+        }
+      }
+    }
+
+  }
+
+  post {
+    unsuccessful {
+      slackSend channel:  "#jenkins", message: "PIXet packaging for mac failed.\n <${currentBuild.absoluteUrl}|${currentBuild.absoluteUrl}>"
+    }
+    always {
+      cleanWs()
+    }
+  }    
+
+}

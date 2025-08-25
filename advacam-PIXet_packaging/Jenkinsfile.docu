@@ -1,0 +1,121 @@
+#!groovy
+def docuDir = "/media/nox2/Software/Public/pixet/docu"
+def buildDate = new Date().format('yyyyMMdd')
+def pixetDocuDir = "distrib/help"
+
+pipeline {
+  agent {
+    label 'linux01' 
+  }
+
+  options {
+    timeout(time: 30, unit: 'MINUTES')
+    timestamps()
+    ansiColor("xterm")
+  }
+
+
+  environment {
+    TERM = 'xterm'
+  }
+
+  parameters{
+    booleanParam(name: 'generatePDFs', 
+      defaultValue: false,
+      description: "Generate PDF documentation from wiki.advacam.cz to nox2/ac/Software/pixet/docu.")
+    booleanParam(name: 'updatePixetPDFs', 
+      defaultValue: false,
+      description: "Commit the last PDFs to pixet git.")
+  }
+
+  stages {
+
+    stage ('Generating PixetPro Documentation'){
+      when {
+        expression {
+          return params.generatePDFs
+        }
+      }
+      steps{
+        script{
+          sh """
+            curl -d "&useskin=vector&action=mpdf" https://wiki.advacam.cz/wiki/PIXet --output PIXetPro.pdf
+            curl -d "&useskin=vector&action=mpdf" https://wiki.advacam.cz/wiki/PIXet_Basic --output PIXetEdu.pdf
+            curl -d "&useskin=vector&action=mpdf" https://wiki.advacam.cz/wiki/EDU_Kit_experiments_cookbook --output PIXetEduKitCookbook.pdf
+            """
+        }
+      }
+    }
+
+    stage ('Generating Pixet API Documentation'){
+      when {
+        expression {
+          return params.generatePDFs
+        }
+      }
+      steps{
+        script{
+          sh """
+            curl -d "&useskin=vector&action=mpdf" https://wiki.advacam.cz/wiki/Binary_core_API --output PIXetAPIC.pdf
+            curl -d "&useskin=vector&action=mpdf" https://wiki.advacam.cz/wiki/Binary_Clustering_API --output PIXetAPICpxProcClustering.pdf
+            curl -d "&useskin=vector&action=mpdf" https://wiki.advacam.cz/wiki/Binary_Spectral_Imaging_API --output PIXetAPICpxProcSpectralImaging.pdf
+            """
+//            curl -d "&useskin=vector&action=mpdf" https://wiki.advacam.cz/wiki/Python_API --output pixetapipython.pdf
+        }
+      }
+    }
+
+    stage ('Deploying'){
+      when {
+        expression {
+          return params.generatePDFs
+        }
+      }
+      steps{
+        script{
+          def destinationDir = docuDir + "/" + buildDate
+          sh """
+            mkdir -p ${destinationDir}
+            cp *.pdf ${destinationDir}
+            """
+          }
+      }
+    }
+
+    stage ('Updating Pixet git'){
+      when {
+        expression {
+          return params.updatePixetPDFs
+        }
+      }
+      steps{
+        script{
+          withCredentials([usernamePassword(credentialsId: 'jenkins_github_ingerlej', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+            def latestDocu = sh (script: """ls -d1 ${docuDir}/*/ | tail -1""", returnStdout: true).trim()
+            sh """
+              git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/advacam/Pixet.git
+              cp ${latestDocu}/*.pdf Pixet/${pixetDocuDir} 
+              cd Pixet
+              git add ${pixetDocuDir}/*.pdf
+              git commit -m "Documentation update"
+              git push
+              cd ..
+              """
+         }
+        }
+      }
+    }
+  }
+  
+
+  post {
+    unsuccessful {
+      slackSend channel:  "#jenkins", message: "PIXet packaging failed.\n <${currentBuild.absoluteUrl}|${currentBuild.absoluteUrl}>"
+    }
+    always {
+      cleanWs()
+    }
+  }    
+
+}
+

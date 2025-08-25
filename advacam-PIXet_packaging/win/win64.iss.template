@@ -1,0 +1,82 @@
+[Setup]
+AppName=PIXet Pro
+AppVersion=#PIXET_VERSION#
+DefaultDirName={pf}\PIXet Pro
+DefaultGroupName=PIXet Pro
+UninstallDisplayIcon={app}\Pixet.exe
+SourceDir=..\_build\Package\Pixet64
+OutputDir=..\..\PixetWin64
+WizardImageFile=..\..\..\win\images\advacam_pixet.bmp
+ArchitecturesInstallIn64BitMode=x64
+WizardSmallImageFile=..\..\..\win\images\inno_smallsetup.bmp
+OutputBaseFilename=setupX64
+
+[Files]
+; Pixet.ini, lic.info, configs, factory will be prepared by script before
+Source: "*.*"; DestDir: "{app}"
+Source: "drivers\*"; DestDir: "{app}\drivers"
+Source: "help\*"; DestDir: "{app}\help"
+Source: "hwlibs\*"; DestDir: "{app}\hwlibs"
+Source: "libs\*"; DestDir: "{app}\libs"; Flags: recursesubdirs skipifsourcedoesntexist
+Source: "plugins\*"; DestDir: "{app}\plugins"
+Source: "scripts\*"; DestDir: "{app}\scripts"
+Source: "platforms\*"; DestDir: "{app}\platforms"
+Source: "styles\*"; DestDir: "{app}\styles"
+Source: "factory\*"; DestDir: "{app}\factory"
+Source: "configs\*"; DestDir: "{app}\configs"
+Source: "samples\*"; DestDir: "{app}\samples"; Flags: recursesubdirs
+Source: "configs\*"; DestDir: "{localappdata}\PixetPro\configs"; Flags: recursesubdirs skipifsourcedoesntexist
+Source: "*.ini"; DestDir: "{localappdata}\PixetPro"; Flags: skipifsourcedoesntexist;
+
+[Dirs]
+Name: "{app}\libs"; Permissions: users-full
+
+[Icons]
+Name: "{group}\PIXet Pro"; Filename: "{app}\Pixet.exe"
+Name: "{group}\Uninstall PIXet Pro"; Filename: "{uninstallexe}"
+
+[Run]
+Filename: {app}\Pixet.exe; Description: "Launch the application"; Flags: skipifsilent nowait postinstall;
+
+[Code]
+function IsDriverInstalled: Boolean;
+var
+  ResultCode: Integer;
+begin
+  Result := False;
+  if Exec('cmd.exe', '/C reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" /s | findstr /I "Opal Kelly"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+  begin
+    if ResultCode = 0 then
+      Result := True;
+  end;
+end;
+
+
+procedure InstallDriver();
+var
+  ResultCode: Integer;
+begin
+  Exec(ExpandConstant('{app}\drivers\USB3Driver.exe'), '/SW /SA /SE', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
+  
+  if not IsDriverInstalled then
+  begin
+    MsgBox('Driver installation failed. Please check the installer for more information.', mbError, MB_OK);
+  end
+  else
+  begin
+    MsgBox('Driver installation succeeded.', mbInformation, MB_OK);
+  end;
+end;
+
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssPostInstall then
+  begin
+    if not IsDriverInstalled then
+    begin
+      MsgBox('Driver is NOT installed on this system. Installing the driver now...', mbError, MB_OK);
+      InstallDriver();
+    end;
+  end;
+end;
