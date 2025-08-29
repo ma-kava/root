@@ -1,0 +1,69 @@
+<Pixet>
+    <plugins>
+        <plugin name="advaquad" />
+        <plugin name="ccrates" />
+        <plugin name="clustering" />
+        <plugin name="configmgr" />
+        <plugin name="dacscans" />
+        <plugin name="devcontrol" />
+        <plugin name="devicemonitor" />
+        <plugin name="devtest" />
+        <plugin name="eduview" />
+        <plugin name="equalization" />
+        <plugin name="frameviewer" />
+        <plugin name="fwflasher" />
+        <plugin name="geigerview" />
+        <plugin name="hdf5io" />
+        <plugin name="imgfilters" />
+        <plugin name="livepreview" />
+        <plugin name="logmgr" />
+        <plugin name="measmgr" />
+        <plugin name="meastpx3" />
+        <plugin name="measutils" />
+        <plugin name="neutronimg" />
+        <plugin name="pyscripting" />
+        <plugin name="remotectrl" />
+        <plugin name="spectraimg" />
+        <plugin name="tiffio" />
+        <plugin name="tpx3data" />
+        <plugin name="updatemgr" />
+        <plugin name="xraybox" />
+    </plugins>
+
+	<versions>
+        <internal>
+            <plugins_to_exclude>
+                
+                <plugin name="updatemgr" />
+
+            </plugins_to_exclude>
+        </internal>
+
+		<external>
+            <plugins_to_exclude>
+
+                <plugin name="neutronimg" />
+                
+            </plugins_to_exclude>
+		</external>
+
+        <EDU>
+            <plugins_to_exclude>
+
+                <plugin name="devcontrol" />
+                <plugin name="devicemonitor" />
+                <plugin name="devtest" />
+                <plugin name="eduview" />
+                <plugin name="equalization" />
+                <plugin name="frameviewer" />
+                <plugin name="fwflasher" />
+                <plugin name="geigerview" />
+                <plugin name="hdf5io" />
+
+            </plugins_to_exclude>
+        </EDU>
+
+
+	</versions>
+
+</Pixet>

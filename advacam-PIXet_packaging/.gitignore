@@ -1,0 +1,5 @@
+.vscode/*
+*manifest.xml
+__pycache__
+_build/*
+../.vscode/settings.json

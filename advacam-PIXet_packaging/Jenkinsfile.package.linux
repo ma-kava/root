@@ -2,7 +2,6 @@
 
 def pixetBuildsDir = "/media/nox2/Software/Builds/pixet/releases"
 def customersDir = "/media/nox2/Software/Public/pixet/customers/"
-def pixetVersion = "0.0.0"
 
 pipeline {
   agent {
@@ -24,7 +23,10 @@ pipeline {
       description: "Add also API to the package.")
     booleanParam(name: 'edu', 
       defaultValue: false,
-      description: "Create EDU version of the package.")
+      description: "Create EDU version of the package."),
+    choice(name: 'license',
+      choices: ['external', 'internal'],
+      description: "Choose license.")
    }
 
   environment {
@@ -33,30 +35,33 @@ pipeline {
 
   stages {
 
-    stage ('Copying files') {
+    stage('Copying files') {
       steps{
         script{
           
-          def lastPixetBuild = sh (script: """ls -d ${pixetBuildsDir}/*/ | sort | tail -1""", returnStdout: true).trim()
-          sh """
-            mkdir -p _build/devices_configs
-            cp ${lastPixetBuild}/*Linux.zip _build
-            """
-          pixetVersion = sh( script: """ls _build/PIXet_Pro*Linux.zip | grep -o \'[0-9]*\\.[0-9]*\\.[0-9]*\'""", returnStdout: true).trim()
-
-          if ( params.customerName.trim().length() ){
-            def sourceDir = customersDir + "/" + params.customerName.trim().replaceAll(" ","\\\\ ") + "/_in"
+          stage('Copy PIXet') {
+            def lastPixetBuild = sh (script: """ls -d ${pixetBuildsDir}/*/ | sort | tail -1""", returnStdout: true).trim()
             sh """
-              if [ "\$(ls -A ${sourceDir})"  ]; then
-                 cp ${sourceDir}/* _build/devices_configs
-              fi
-              """          
+              mkdir -p _build/devices_configs
+              cp ${lastPixetBuild}/*Linux.zip _build
+              """
+            env.PIXET_VERSION = sh( script: """ls _build/PIXet_Pro*Linux.zip | grep -o \'[0-9]*\\.[0-9]*\\.[0-9]*\'""", returnStdout: true).trim()
+
+            if ( params.customerName.trim().length() ){
+              def sourceDir = customersDir + "/" + params.customerName.trim().replaceAll(" ","\\\\ ") + "/_in"
+              sh """
+                if [ "\$(ls -A ${sourceDir})"  ]; then
+                  cp ${sourceDir}/* _build/devices_configs
+                fi
+                """          
+            }
           }
         }
       }
     }
   
-    stage ('Creating packages') {
+  
+    stage('Creating packages') {
       steps{
         script{
           def workspacePath = env.WORKSPACE
@@ -71,13 +76,13 @@ pipeline {
             packagerParams = packagerParams + " -lic \\\"" + params.customerName.trim() + "\\\"";
           }
           sh """
-             docker run --rm --user 1001:1001 -v "${workspacePath}":/opt/PixetPackage:Z -t ubuntu22.04dev_64 bash -c "cd /opt/PixetPackage; bash ./package_linux.sh -pversion ${pixetVersion} ${packagerParams}"
+             docker run --rm --user 1001:1001 -v "${workspacePath}":/opt/PixetPackage:Z -t ubuntu22.04dev_64 bash -c "cd /opt/PixetPackage; bash ./package_linux.sh -pversion ${env.PIXET_VERSION} ${packagerParams}"
              """    
         }
       }
     }
 
-    stage ('Deploying to nox2') {
+    stage('Deploying to nox2') {
       steps{
         script{
           def destinationDir = sh (script: """ls -d ${pixetBuildsDir}/*/ | sort | tail -1""", returnStdout: true).trim()          
@@ -87,15 +92,15 @@ pipeline {
           def VER = params.edu ? "EDU" : "Pro"
           sh """
             mkdir -p ${destinationDir} 
-            rm -f ${destinationDir}/PIXet_${VER}_${pixetVersion}_Linux.deb ${destinationDir}/PIXet_${VER}_${pixetVersion}_Linux.rpm ${destinationDir}/PIXet_${VER}_${pixetVersion}_Linux.tar.gz
-            cp _build/pixet.deb ${destinationDir}/PIXet_${VER}_${pixetVersion}_Linux.deb
-            cp _build/pixet.rpm ${destinationDir}/PIXet_${VER}_${pixetVersion}_Linux.rpm
-            cp _build/pixet.tar.gz ${destinationDir}/PIXet_${VER}_${pixetVersion}_Linux.tar.gz
+            rm -f ${destinationDir}/PIXet_${VER}_${env.PIXET_VERSION}_Linux.deb ${destinationDir}/PIXet_${VER}_${env.PIXET_VERSION}_Linux.rpm ${destinationDir}/PIXet_${VER}_${env.PIXET_VERSION}_Linux.tar.gz
+            cp _build/pixet.deb ${destinationDir}/PIXet_${VER}_${env.PIXET_VERSION}_Linux.deb
+            cp _build/pixet.rpm ${destinationDir}/PIXet_${VER}_${env.PIXET_VERSION}_Linux.rpm
+            cp _build/pixet.tar.gz ${destinationDir}/PIXet_${VER}_${env.PIXET_VERSION}_Linux.tar.gz
             """
           if (params.api) {
             sh """
-              rm -f ${destinationDir}/API_PIXet_${VER}_${pixetVersion}_Linux.tar.gz
-              cp _build/pixetAPI.tar.gz ${destinationDir}/API_PIXet_${VER}_${pixetVersion}_Linux.tar.gz
+              rm -f ${destinationDir}/API_PIXet_${VER}_${env.PIXET_VERSION}_Linux.tar.gz
+              cp _build/pixetAPI.tar.gz ${destinationDir}/API_PIXet_${VER}_${env.PIXET_VERSION}_Linux.tar.gz
               """            
           }
         }

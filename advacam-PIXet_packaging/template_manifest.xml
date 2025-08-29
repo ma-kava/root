@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Pixet>
+
+	<versions>
+		<API>
+			<directories>
+				<dir source="distrib/fw" destination="." platform="Windows_x64,Linux_x64,Darwin_x64_ARM64" />
+
+				<dir source="distrib/linux/drivers" destination="." platform="Linux_x64" />
+
+				<dir source="lib/frontpanel/linux/arm32" destination="." platform="Linux_ARM32" />
+
+				<dir source="lib/frontpanel/linux/arm64" destination="." platform="Linux_ARM64" />
+			</directories>
+
+			<files>
+				<file source="distrib/configs/dev/fitpix.ini" destination="." />
+				<file source="distrib/configs/dev/minipix.ini" destination="." />
+				<file source="distrib/configs/dev/zem.ini" destination="." />
+				<file source="distrib/configs/dev/zest.ini" destination="." />
+				<file source="distrib/configs/dev/widepix.ini" destination="." />
+				<file source="distrib/configs/dev/dummy.ini" destination="." />
+				<file source="src/interfaces/pxcapi.h" destination="." />
+				<file source="src/shared/common.h" destination="." />
+				<file source="examples/pxcapi/main.cpp" destination="." />
+				<file source="examples/pyapi/example.py" destination="." />
+				<file source="distrib/help/PIXetAPIC.pdf" destination="." />
+				<file source="distrib/help/PIXetAPICpxprocClustering.pdf" destination="." />
+				<file source="distrib/help/PIXetAPICpxprocSpectralImaging.pdf" destination="." />
+				<file source="distrib/help/PIXetAPIPython.pdf" destination="." />
+				<file source="distrib/lic.info" destination="lic.info" />		
+
+				<file source="distrib/configs/api/win/pixet.ini" destination="." platform="Windows_x64" />		
+				<file source="#BUILD_DIR#/pxcore.dll" destination="." platform="Windows_x64" />
+				<file source="#BUILD_DIR#/pxcore.lib" destination="." platform="Windows_x64" />
+				<file source="#BUILD_DIR#/pxproc.dll" destination="." platform="Windows_x64" />
+				<files source="#BUILD_DIR#" wildcard="pypixet.pyd" destination="." platform="Windows_x64" />
+				<files source="#BUILD_DIR#" wildcard="pypxproc*.pyd" destination="." platform="Windows_x64" />
+				<file source="#BUILD_DIR#/hwlibs/fitpix.dll" destination="." platform="Windows_x64" />
+				<file source="#BUILD_DIR#/hwlibs/minipix.dll" destination="." platform="Windows_x64" />
+				<file source="#BUILD_DIR#/hwlibs/widepix.dll" destination="." platform="Windows_x64" />
+				<file source="#BUILD_DIR#/hwlibs/zem.dll" destination="." platform="Windows_x64" />
+				<file source="#BUILD_DIR#/hwlibs/zest.dll" destination="." platform="Windows_x64" />
+				<file source="#BUILD_DIR#/hwlibs/dummy.dll" destination="." platform="Windows_x64" />
+				<file source="lib/frontpanel/win/x64/okFrontPanel.dll" destination="." platform="Windows_x64" />
+				<file source="lib/ftdi/win/ftd2xx64.dll" destination="." platform="Windows_x64" />				
+				<file source="lib/advascope_sdk/windows/x64/release/AdvsSdk.dll" destination="." platform="Windows_x64" />
+				<file source="lib/advascope_abrd_hwlib/windows/x64/release/AdvsHwlib.dll" destination="abrd-hwlib.dll" platform="Windows_x64" />
+
+				<file source="#BUILD_DIR#/pxcore.so" destination="libpxcore.so" platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="#BUILD_DIR#/pxcore.so" destination="." platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="#BUILD_DIR#/hwlibs/fitpix.so" destination="." platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="#BUILD_DIR#/hwlibs/minipix.so" destination="." platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="#BUILD_DIR#/hwlibs/widepix.so" destination="." platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="#BUILD_DIR#/hwlibs/zem.so" destination="." platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="#BUILD_DIR#/hwlibs/zest.so" destination="." platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="#BUILD_DIR#/hwlibs/dummy.so" destination="." platform="Linux_x64,Darwin_x64_ARM64" />
+
+				<file source="#BUILD_DIR#/libpxproc.so" destination="." platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="#BUILD_DIR#/libpxproc.so" destination="pxproc.so" platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="#BUILD_DIR#/pypixet.so" destination="." platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="#BUILD_DIR#/pypxproc.so" destination="." platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="distrib/configs/api/unix/pixet.ini" destination="." platform="Linux_x64,Darwin_x64_ARM64" />
+
+				<file source="lib/frontpanel/linux/libokFrontPanel.so" destination="." platform="Linux_x64" />
+				<file source="lib/advascope_sdk/linux/x64/release/libAdvsSdk.so" destination="libAdvsSdk.so" platform="Linux_x64" />
+				<file source="lib/advascope_sdk/linux/x64/release/libAdvsSdk.so" destination="libAdvsSdk.so.0" platform="Linux_x64" />
+				<file source="lib/advascope_sdk/linux/x64/release/libAdvsSdk.so" destination="libAdvsSdk.so.0.0.32" platform="Linux_x64" />
+				<file source="lib/advascope_abrd_hwlib/linux/x64/release/libAdvsHwlib.so" destination="abrd-hwlib.so" platform="Linux_x64" />
+
+				<file source="distrib/configs/api/linux_arm/pixet.ini" destination="." platform="Linux_ARM32,Linux_ARM64" />
+				<file source="#BUILD_DIR#/fitpix.so" destination="libfitpix.so" platform="Linux_ARM32,Linux_ARM64" />
+				<file source="#BUILD_DIR#/minipix.so" destination="libminipix.so" platform="Linux_ARM32,Linux_ARM64" />
+				<file source="#BUILD_DIR#/usb.so" destination="libusbpix.so" platform="Linux_ARM32,Linux_ARM64" />
+				<file source="#BUILD_DIR#/zest.so" destination="." platform="Linux_ARM32,Linux_ARM64" />
+				<file source="#BUILD_DIR#/pxcore.so" destination="libpxcore.so" platform="Linux_ARM32,Linux_ARM64" />
+				<file source="#BUILD_DIR#/pxcore.so" destination="." platform="Linux_ARM32,Linux_ARM64" />
+				<file source="#BUILD_DIR#/pypixet.so" destination="pypixet.so" platform="Linux_ARM32,Linux_ARM64" />				
+				<file source="distrib/linux/drivers/install_driver_rules.sh" destination="." platform="Linux_ARM32,Linux_ARM64" />
+				<file source="distrib/linux/drivers/60-opalkelly.rules" destination="." platform="Linux_ARM32,Linux_ARM64" />
+				<file source="distrib/linux/drivers/60-pixet.rules" destination="." platform="Linux_ARM32,Linux_ARM64" />
+				<file source="distrib/fw/zemtpx3pix.rbf" destination="." platform="Linux_ARM32,Linux_ARM64" />
+
+				<file source="lib/frontpanel/osx/libokFrontPanel.dylib" destination="." platform="Darwin_x64_ARM64" />
+			</files>
+		</API>
+
+		<Pro>
+			<out_dirs>
+				<dir>plugins</dir>
+				<dir>hwlibs</dir>
+				<dir>drivers</dir>
+				<dir>help</dir>
+				<dir platform="Windows_x64,Linux_x64">platforms</dir>
+				<dir platform="Linux_x64">platformthemes</dir>
+				<dir>configs</dir>
+				<dir>factory</dir>
+				<dir>scripts</dir>
+				<dir>libs</dir>
+
+				<dir platform="Windows_x64">styles</dir>
+				<dir pdb_root="True" platform="Windows_x64">../pdb</dir>
+				<dir platform="Windows_x64">../pdb/plugins</dir>
+				<dir platform="Windows_x64">../pdb/hwlibs</dir>
+				<dir platform="Windows_x64">../pdb/libs</dir>
+
+				<dir platform="Darwin_x64_ARM64" executable="True">Pixet.app</dir>
+			</out_dirs>
+
+			<directories>
+				<dir source="distrib/fw" destination="." />
+				<dir source="distrib/configs/dev" destination="." />
+				<dir source="distrib/configs/pro" destination="." />
+				<dir source="distrib/python" destination="scripts" />
+				<dir source="distrib/samples" destination="samples" />
+				
+				<dir source="distrib/win/drivers" destination="drivers" platform="Windows_x64" />
+				<dir source="distrib/win/python3" destination="libs" platform="Windows_x64" />
+
+				<dir source="#BUILD_DIR#/hwlibs" destination="hwlibs" platform="Linux_x64,Darwin_x64_ARM64"/>
+				<dir source="#BUILD_DIR#/plugins" destination="plugins" platform="Linux_x64,Darwin_x64_ARM64"/>
+				<dir source="#BUILD_DIR#/libs" destination="libs" platform="Linux_x64,Darwin_x64_ARM64"/>
+				
+				<dir source="distrib/linux/drivers" destination="." platform="Linux_x64" />
+				<dir source="distrib/linux/python3" destination="." platform="Linux_x64" />
+				<!-- <dir source="distrib/linux/drivers" destination="drivers" platform="Linux_x64" /> -->
+				
+				<dir source="distrib/mac/python3" destination="." platform="Darwin_x64_ARM64" />
+				<!-- <dir source="#BUILD_DIR#/help" destination="PixetLite.app/Contents/help" platform="Darwin_x64_ARM64" /> -->
+				<!-- <dir source="#BUILD_DIR#/factory" destination="PixetLite.app/Contents/factory" platform="Darwin_x64_ARM64" /> -->
+				<dir source="#BUILD_DIR#/Pixet.app" destination="Pixet.app" platform="Darwin_x64_ARM64" />	
+			</directories>
+
+			<files>
+				<file source="distrib/help/PIXetPro.pdf" destination="help/PIXetPro.pdf" />
+				<file source="distrib/lic.info" destination="lic.info" />
+
+				<file source="#BUILD_DIR#/pxcore.dll" destination="." platform="Windows_x64" to_lib="True" />
+				<file source="#BUILD_DIR#/pxproc.dll" destination="." platform="Windows_x64" />
+				<files source="#BUILD_DIR#/libs" wildcard="*.dll" destination="libs" platform="Windows_x64"/>
+				<files source="#BUILD_DIR#/libs" wildcard="*.pyd" destination="libs" platform="Windows_x64"/> -->
+				<files source="#BUILD_DIR#" wildcard="*.pyd" destination="." platform="Windows_x64"/> -->
+				<files source="#BUILD_DIR#/hwlibs" wildcard="*.dll" destination="hwlibs"  platform="Windows_x64"/>
+				<files source="#BUILD_DIR#/plugins" wildcard="*.dll" destination="plugins"  platform="Windows_x64"/>
+				<files source="#BUILD_DIR#" wildcard="*.pdb" destination="../pdb" platform="Windows_x64"/>
+				<files source="#BUILD_DIR#/hwlibs" wildcard="*.pdb" destination="../pdb/hwlibs" platform="Windows_x64"/>
+				<files source="#BUILD_DIR#/plugins" wildcard="*.pdb" destination="../pdb/plugins" platform="Windows_x64"/>
+				<files source="#BUILD_DIR#/libs" wildcard="*.pdb" destination="../pdb/libs" platform="Windows_x64"/>		
+				<file source="#BUILD_DIR#/Pixet.exe" destination="." platform="Windows_x64"/>
+				<file source="distrib/win/bspulse.dll" destination="." platform="Windows_x64" />
+				<file source="distrib/win/mfcloop.dll" destination="." platform="Windows_x64" />
+				<file source="distrib/win/qt_msvc64_vc17/mfc110.dll" destination="." platform="Windows_x64" />
+				<file source="distrib/win/qt_msvc64_vc17/msvcp120.dll" destination="." platform="Windows_x64" />
+				<file source="distrib/win/qt_msvc64_vc17/msvcp140.dll" destination="." platform="Windows_x64" />
+				<file source="distrib/win/qt_msvc64_vc17/msvcp140_1.dll" destination="." platform="Windows_x64" />
+				<file source="distrib/win/qt_msvc64_vc17/msvcp140_2.dll" destination="." platform="Windows_x64" />
+				<file source="distrib/win/qt_msvc64_vc17/msvcr110.dll" destination="." platform="Windows_x64" />
+				<file source="distrib/win/qt_msvc64_vc17/msvcr120.dll" destination="." platform="Windows_x64" />
+				<file source="distrib/win/qt_msvc64_vc17/vccorlib140.dll" destination="." platform="Windows_x64" />
+				<file source="distrib/win/qt_msvc64_vc17/vcruntime140.dll" destination="." platform="Windows_x64" />
+				<file source="distrib/win/qt_msvc64_vc17/vcruntime140_1.dll" destination="." platform="Windows_x64" />
+				<file source="lib/frontpanel/win/x64/okFrontPanel.dll" destination="." platform="Windows_x64" />
+				<file source="lib/python3/win64/python37.dll" destination="." platform="Windows_x64" debug="False" />
+				<file source="lib/python3/win64/python37_d.dll" destination="." platform="Windows_x64" debug="True"/>
+				<file source="lib/ftdi/win/ftd2xx64.dll" destination="." platform="Windows_x64" />				
+				<file source="lib/advascope_sdk/windows/x64/release/AdvsSdk.dll" destination="." platform="Windows_x64" debug="False"/>
+				<file source="lib/advascope_sdk/windows/x64/debug/AdvsSdk.dll" destination="." platform="Windows_x64" debug="True"/>
+				<file source="lib/advascope_abrd_hwlib/windows/x64/release/AdvsHwlib.dll" destination="hwlibs/abrd-hwlib.dll" platform="Windows_x64" debug="False"/>
+				<file source="lib/advascope_abrd_hwlib/windows/x64/debug/AdvsHwlib.dll" destination="hwlibs/abrd-hwlib.dll" platform="Windows_x64" debug="True"/>
+
+				<file source="#BUILD_DIR#/pxcore.so" destination="." platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="#BUILD_DIR#/pxcore.so" destination="libpxcore.so" platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="#BUILD_DIR#/libpxproc.so" destination="pxproc.so" platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="#BUILD_DIR#/libpxproc.so" destination="." platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="#BUILD_DIR#/pypxproc.so" destination="." platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="#BUILD_DIR#/pypixetgui.so" destination="." platform="Linux_x64,Darwin_x64_ARM64" />
+				<file source="#BUILD_DIR#/pypixet.so" destination="." platform="Linux_x64,Darwin_x64_ARM64" />
+		
+				<file source="#BUILD_DIR#/Pixet" destination="Pixet" platform="Linux_x64" executable="True"/>
+				<file source="distrib/linux/pixet.sh" destination="pixet.sh" platform="Linux_x64" executable="True"/>
+				<file source="lib/frontpanel/linux/libokFrontPanel.so" destination="." platform="Linux_x64" />
+				<file source="./src/pxpro/PIXet_ikonka_white_256x256.png" destination="pixet.png" platform="Linux_x64" />
+				<file source="lib/advascope_sdk/linux/x64/release/libAdvsSdk.so" destination="." platform="Linux_x64" debug="False"/>
+				<file source="lib/advascope_sdk/linux/x64/debug/libAdvsSdk.so" destination="." platform="Linux_x64" debug="True"/>
+				<file source="lib/advascope_sdk/linux/x64/release/libAdvsSdk.so" destination="libAdvsSdk.so.0" platform="Linux_x64" debug="False"/>
+				<file source="lib/advascope_sdk/linux/x64/debug/libAdvsSdk.so" destination="libAdvsSdk.so.0" platform="Linux_x64" debug="True"/>
+				<file source="lib/advascope_sdk/linux/x64/release/libAdvsSdk.so" destination="libAdvsSdk.so.0.0.32" platform="Linux_x64" debug="False"/>
+				<file source="lib/advascope_sdk/linux/x64/debug/libAdvsSdk.so" destination="libAdvsSdk.so.0.0.32" platform="Linux_x64" debug="True"/>
+				<file source="lib/advascope_abrd_hwlib/linux/x64/release/libAdvsHwlib.so" destination="hwlibs/abrd-hwlib.so" platform="Linux_x64" debug="False"/>
+				<file source="lib/advascope_abrd_hwlib/linux/x64/debug/libAdvsHwlib.so" destination="hwlibs/abrd-hwlib.so" platform="Linux_x64" debug="True"/>
+				<file source="#BUILD_DIR#/modules/libcengine_api.so" destination="." platform="Linux_x64" />
+
+				<file source="distrib/mac/drivers/D2xxHelper_v2.0.0.pkg" destination="drivers" platform="Darwin_x64_ARM64" />
+				<file source="lib/frontpanel/osx/libokFrontPanel.dylib" destination="." platform="Darwin_x64_ARM64" />
+				<file source="distrib/mac/pixet.sh" destination="pixet.sh" platform="Darwin_x64_ARM64" executable="True"/>
+
+				<file source="#QT_PATH#/bin/Qt6Core.dll" destination="." platform="Windows_x64" debug="False" />
+				<file source="#QT_PATH#/bin/Qt6Gui.dll" destination="." platform="Windows_x64" debug="False"/>
+				<file source="#QT_PATH#/bin/Qt6Network.dll" destination="." platform="Windows_x64" debug="False"/>
+				<file source="#QT_PATH#/bin/Qt6Widgets.dll" destination="." platform="Windows_x64" debug="False"/>
+				<file source="#QT_PATH#/bin/Qt6PrintSupport.dll" destination="." platform="Windows_x64" debug="False"/>
+				<file source="#QT_PATH#/bin/Qt6UiTools.dll" destination="." platform="Windows_x64" debug="False"/>
+				<file source="#QT_PATH#/bin/Qt6OpenGLWidgets.dll" destination="." platform="Windows_x64" debug="False"/>
+				<file source="#QT_PATH#/bin/Qt6OpenGL.dll" destination="." platform="Windows_x64" debug="False"/>
+				<file source="#QT_PATH#/plugins/platforms/qwindows.dll" destination="platforms" platform="Windows_x64" debug="False"/>
+				<file source="#QT_PATH#/plugins/styles/qmodernwindowsstyle.dll" destination="styles" platform="Windows_x64" debug="False"/>
+
+				<file source="#QT_PATH#/bin/Qt6Cored.dll" destination="." platform="Windows_x64" debug="True" />
+				<file source="#QT_PATH#/bin/Qt6Guid.dll" destination="." platform="Windows_x64" debug="True"/>
+				<file source="#QT_PATH#/bin/Qt6Networkd.dll" destination="." platform="Windows_x64" debug="True"/>
+				<file source="#QT_PATH#/bin/Qt6Widgetsd.dll" destination="." platform="Windows_x64" debug="True"/>
+				<file source="#QT_PATH#/bin/Qt6PrintSupportd.dll" destination="." platform="Windows_x64" debug="True"/>
+				<file source="#QT_PATH#/bin/Qt6UiToolsd.dll" destination="." platform="Windows_x64" debug="True"/>
+				<file source="#QT_PATH#/bin/Qt6OpenGLWidgetsd.dll" destination="." platform="Windows_x64" debug="True"/>
+				<file source="#QT_PATH#/bin/Qt6OpenGLd.dll" destination="." platform="Windows_x64" debug="True"/>
+				<file source="#QT_PATH#/plugins/platforms/qwindowsd.dll" destination="platforms" platform="Windows_x64" debug="True"/>
+				<file source="#QT_PATH#/plugins/styles/qmodernwindowsstyled.dll" destination="styles" platform="Windows_x64" debug="True"/>
+
+				<file source="#QT_PATH#/lib/libicudata.so.73" destination="." platform="Linux_x64" />
+				<file source="#QT_PATH#/lib/libicui18n.so.73" destination="." platform="Linux_x64" />
+				<file source="#QT_PATH#/lib/libicuuc.so.73" destination="." platform="Linux_x64" />
+				<file source="#QT_PATH#/lib/libQt6Core.so.6" destination="." platform="Linux_x64" />
+				<file source="#QT_PATH#/lib/libQt6DBus.so.6" destination="." platform="Linux_x64" />
+				<file source="#QT_PATH#/lib/libQt6Gui.so.6" destination="." platform="Linux_x64" />
+				<file source="#QT_PATH#/lib/libQt6Network.so.6" destination="." platform="Linux_x64" />
+				<file source="#QT_PATH#/lib/libQt6PrintSupport.so.6" destination="." platform="Linux_x64" />
+				<file source="#QT_PATH#/lib/libQt6WaylandEglClientHwIntegration.so.6" destination="." platform="Linux_x64" />
+				<file source="#QT_PATH#/lib/libQt6OpenGL.so.6" destination="." platform="Linux_x64" />
+				<file source="#QT_PATH#/lib/libQt6Widgets.so.6" destination="." platform="Linux_x64" />
+				<file source="#QT_PATH#/lib/libQt6XcbQpa.so.6" destination="." platform="Linux_x64" />
+				<file source="#QT_PATH#/lib/libQt6WaylandClient.so.6" destination="." platform="Linux_x64" />
+				<file source="#QT_PATH#/plugins/platforms/libqxcb.so" destination="platforms" platform="Linux_x64" />
+				<file source="#QT_PATH#/plugins/platforms/libqwayland-egl.so" destination="platforms" platform="Linux_x64" />
+				<file source="#QT_PATH#/plugins/platforms/libqwayland-generic.so" destination="platforms" platform="Linux_x64" />
+				<file source="#QT_PATH#/plugins/platformthemes/libqgtk3.so" destination="platformthemes" platform="Linux_x64" />
+				<file source="#QT_PATH#/plugins/platformthemes/libqxdgdesktopportal.so" destination="platformthemes" platform="Linux_x64" />
+			</files>
+		</Pro>
+	</versions>
+	
+	<distro_id>
+		<distro_num>src/pxcore/buildnum.h</distro_num>
+		<distro_ver>src/interfaces/ipixet.h</distro_ver>
+	</distro_id>
+
+	<!-- the qt_disrs section is informative,  QT_PATH is set by release script using placeholder switch -->
+	<!-- <qt_dirs> 	
+		<dir platform="Darwin_x64_ARM64">/opt/Qt/6.2.4/macos</dir>
+		<dir platform="Linux_x64">/opt/Qt/6.2.4/gcc_64</dir>
+		<dir platform="Windows_x64">C:/prg/Qt/6.2.4/msvc2019_64</dir>
+	</qt_dirs> -->
+
+	<dll_tools>
+		<pxcore_file>#BUILD_DIR#/pxcore.dll</pxcore_file>
+		<dumper>distrib/win/tools/dumpbin.exe</dumper>
+		<lib_exe>distib/win/tools/lib.exe</lib_exe>			
+	</dll_tools>
+
+</Pixet>
