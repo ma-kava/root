@@ -23,7 +23,7 @@ pipeline {
       description: "Add also API to the package.")
     booleanParam(name: 'edu', 
       defaultValue: false,
-      description: "Create EDU version of the package."),
+      description: "Create EDU version of the package.")
     choice(name: 'license',
       choices: ['external', 'internal'],
       description: "Choose license.")
