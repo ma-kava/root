@@ -102,7 +102,7 @@ if [ "$PACKAGE_DEB" = "true" ]; then
 
 	DEB_PIXET_DIR=${PACKAGE_DIR}/deb/pixet/opt/pixet
 	mkdir -p ${DEB_PIXET_DIR}
-	unzip "${DISTRIB_BUILD_DIR}/PIXet_Pro*" -d  ${DEB_PIXET_DIR}
+	unzip "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  ${DEB_PIXET_DIR}
 
 	python "purge_pixet.py" --plugin-dir ${DEB_PIXET_DIR}/plugins --version EDU --platform Linux_x64 --xml-config plugin_cookbook.xml
 
@@ -144,7 +144,7 @@ if [ "$PACKAGE_RPM" = "true" ]; then
 
 	RMP_PIXET_DIR=${PACKAGE_DIR}/rpm/pixet/BUILDROOT/pixet/opt/pixet
 	mkdir -p ${RMP_PIXET_DIR}
-	unzip  "${DISTRIB_BUILD_DIR}/PIXet_Pro*" -d  ${RMP_PIXET_DIR}
+	unzip  "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  ${RMP_PIXET_DIR}
 
 	python "purge_pixet.py" --plugin-dir ${RMP_PIXET_DIR}/plugins --version EDU --platform Linux_x64 --xml-config plugin_cookbook.xml
 
@@ -184,7 +184,7 @@ if [ "$PACKAGE_TARGZ" = "true" ]; then
 
 	ZIP_PIXET_DIR=${PACKAGE_DIR}/zip/pixet
 	mkdir -p ${ZIP_PIXET_DIR}
-	unzip  "${DISTRIB_BUILD_DIR}/PIXet_Pro*" -d  ${ZIP_PIXET_DIR}
+	unzip  "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  ${ZIP_PIXET_DIR}
 
 	python "purge_pixet.py" --plugin-dir ${ZIP_PIXET_DIR}/plugins --version EDU --platform Linux_x64 --xml-config plugin_cookbook.xml
 
@@ -224,7 +224,7 @@ if [ "$PACKAGE_API" = "true" ]; then
 
 	API_DIR=${PACKAGE_DIR}/api
 	mkdir -p ${API_DIR}
-	unzip  "${DISTRIB_BUILD_DIR}/PIXet_API*" -d  ${API_DIR}
+	unzip  "${DISTRIB_BUILD_DIR}/Pixet_API*" -d  ${API_DIR}
 
 	python "purge_pixet.py" --plugin-dir ${API_DIR}/plugins --version EDU --platform Linux_x64 --xml-config plugin_cookbook.xml
 	
