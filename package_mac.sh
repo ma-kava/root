@@ -85,7 +85,7 @@ if [ "$PACKAGE_DMG" = "true" ]; then
     mkdir -vp "${PACKAGE_DIR}/Contents/MacOS" 
     mkdir -vp "${PACKAGE_DIR}/Contents/Resources"
    
-    unzip "${DISTRIB_BUILD_DIR}/PIXet_Pro*" -d  "${PIXET_DIR}"
+    unzip "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  "${PIXET_DIR}"
 
 	if [ "$PACKAGE_EDU" = "true" ]; then
 		sed -i '' 's/;MainUi=devcontrol/MainUi=eduview/' "${PIXET_DIR}/pixet.ini"
@@ -127,6 +127,8 @@ if [ "$PACKAGE_DMG" = "true" ]; then
 
     mkdir "${MOUNT_POINT}/.background"
     cp "${BASE_DIR}/mac/dmgimage.png" "${MOUNT_POINT}/.background/dmgimage.png"
+    SetFile -a V "${MOUNT_POINT}/.background"
+    SetFile -a V "${MOUNT_POINT}/.fseventsd"
     #sips -m /System/Library/ColorSync/Profiles/sRGB\ Profile.icc "${MOUNT_POINT}/.background/dmgimage.png"
     #sips -m /System/Library/ColorSync/Profiles/Generic\ Gray\ Gamma\ 2.2\ Profile.icc "${MOUNT_POINT}/.background/dmgimage.png"
 osascript << EOF
@@ -154,7 +156,8 @@ EOF
 
     cp "${BASE_DIR}/mac/pixetdrive.icns" "${MOUNT_POINT}/.VolumeIcon.icns"
     SetFile -c icnC "${MOUNT_POINT}/.VolumeIcon.icns"
-    SetFile -a C ${MOUNT_POINT}
+    SetFile -a V "${MOUNT_POINT}/.VolumeIcon.icns"
+    SetFile -a C "${MOUNT_POINT}"
 
     hdiutil detach "${MOUNT_POINT}"
     hdiutil convert "${DISTRIB_BUILD_DIR}/${IMAGE_NAME}_temp.dmg" -format UDZO -imagekey zlib-level=9 -o "${DISTRIB_BUILD_DIR}/${IMAGE_NAME}.dmg"
@@ -167,14 +170,14 @@ if [ "$PACKAGE_API" = "true" ]; then
 	 echo ===================================
 	 echo Building zip API package
 
-    rm -rf "${DISTRIB_BUILD_DIR}/pixetAPI.zip"
+    rm -rf "${DISTRIB_BUILD_DIR}/Pixet_API.zip"
     rm -rf "${API_DIR}"    
     mkdir -p "${API_DIR}"
 
-    unzip "${DISTRIB_BUILD_DIR}"/PIXet_API* -d  "${API_DIR}"
+    unzip "${DISTRIB_BUILD_DIR}"/Pixet_API* -d  "${API_DIR}"
     cp lic.info "${API_DIR}" 
 
-    zip -j "${DISTRIB_BUILD_DIR}"/pixetAPI.zip "${API_DIR}"/*
+    zip -j "${DISTRIB_BUILD_DIR}"/Pixet_API.zip "${API_DIR}"/*
 
     rm -rf "${API_DIR}"
 

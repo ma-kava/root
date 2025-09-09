@@ -39,22 +39,20 @@ pipeline {
       steps{
         script{
           
-          stage('Copy PIXet') {
-            def lastPixetBuild = sh (script: """ls -d ${pixetBuildsDir}/*/ | sort | tail -1""", returnStdout: true).trim()
-            sh """
-              mkdir -p _build/devices_configs
-              cp ${lastPixetBuild}/*Linux_x64.zip _build
-              """
-            env.PIXET_VERSION = sh( script: """ls _build/Pixet_Pro*Linux*.zip | grep -o \'[0-9]*\\.[0-9]*\\.[0-9]*\'""", returnStdout: true).trim()
+          def lastPixetBuild = sh (script: """ls -d ${pixetBuildsDir}/*/ | sort | tail -1""", returnStdout: true).trim()
+          sh """
+            mkdir -p _build/devices_configs
+            cp ${lastPixetBuild}/*Linux_x64.zip _build
+            """
+          env.PIXET_VERSION = sh( script: """ls _build/Pixet_API*Linux_x64.zip | grep -o \'[0-9]*\\.[0-9]*\\.[0-9]*\'""", returnStdout: true).trim()
 
-            if ( params.customerName.trim().length() ){
-              def sourceDir = customersDir + "/" + params.customerName.trim().replaceAll(" ","\\\\ ") + "/_in"
-              sh """
-                if [ "\$(ls -A ${sourceDir})"  ]; then
-                  cp ${sourceDir}/* _build/devices_configs
-                fi
-                """          
-            }
+          if ( params.customerName.trim().length() ){
+            def sourceDir = customersDir + "/" + params.customerName.trim().replaceAll(" ","\\\\ ") + "/_in"
+            sh """
+              if [ "\$(ls -A ${sourceDir})"  ]; then
+                cp ${sourceDir}/* _build/devices_configs
+              fi
+              """          
           }
         }
       }
@@ -92,15 +90,15 @@ pipeline {
           def VER = params.edu ? "EDU" : "Pro"
           sh """
             mkdir -p ${destinationDir} 
-            rm -f ${destinationDir}/PIXet_${VER}_${env.PIXET_VERSION}_Linux.deb ${destinationDir}/PIXet_${VER}_${env.PIXET_VERSION}_Linux.rpm ${destinationDir}/PIXet_${VER}_${env.PIXET_VERSION}_Linux.tar.gz
-            cp _build/pixet.deb ${destinationDir}/PIXet_${VER}_${env.PIXET_VERSION}_Linux.deb
-            cp _build/pixet.rpm ${destinationDir}/PIXet_${VER}_${env.PIXET_VERSION}_Linux.rpm
-            cp _build/pixet.tar.gz ${destinationDir}/PIXet_${VER}_${env.PIXET_VERSION}_Linux.tar.gz
+            rm -f ${destinationDir}/PIXet_${VER}_GUI_${env.PIXET_VERSION}_Linux_x64.deb ${destinationDir}/PIXet_${VER}_GUI_${env.PIXET_VERSION}_Linux_x64.rpm ${destinationDir}/PIXet_${VER}_GUI_${env.PIXET_VERSION}_Linux_x64.tar.gz
+            cp _build/pixet.deb ${destinationDir}/PIXet_${VER}_GUI_${env.PIXET_VERSION}_Linux_x64.deb
+            cp _build/pixet.rpm ${destinationDir}/PIXet_${VER}_GUI_${env.PIXET_VERSION}_Linux_x64.rpm
+            cp _build/pixet.tar.gz ${destinationDir}/PIXet_${VER}_GUI_${env.PIXET_VERSION}_Linux_x64.tar.gz
             """
           if (params.api) {
             sh """
-              rm -f ${destinationDir}/API_PIXet_${VER}_${env.PIXET_VERSION}_Linux.tar.gz
-              cp _build/pixetAPI.tar.gz ${destinationDir}/API_PIXet_${VER}_${env.PIXET_VERSION}_Linux.tar.gz
+              rm -f ${destinationDir}/PIXet_${VER}_API_${env.PIXET_VERSION}_Linux_x64.tar.gz
+              cp _build/pixetAPI.tar.gz ${destinationDir}/PIXet_${VER}_API_${env.PIXET_VERSION}_Linux_x64.tar.gz
               """            
           }
         }

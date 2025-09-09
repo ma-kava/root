@@ -42,9 +42,9 @@ pipeline {
           echo "Last Pixet Build: ${lastPixetDir}"
           bat """
             if not exist _build\\devices_configs mkdir _build\\devices_configs
-            copy /Y ${lastPixetBuild}\\*Win.zip _build        
+            copy /Y ${lastPixetBuild}\\*Windows_x64.zip _build        
             """
-          pixetVersion = powershell(script: """Get-ChildItem -Filter "_build\\PIXet_Pro*Win.zip" | ForEach-Object { if (\$_.Name -match '(\\d+\\.\\d+\\.\\d+)') { \$matches[0] } }""", returnStdout: true).trim()
+          pixetVersion = powershell(script: """Get-ChildItem -Filter "_build\\Pixet_API*Windows_x64.zip" | ForEach-Object { if (\$_.Name -match '(\\d+\\.\\d+\\.\\d+)') { \$matches[0] } }""", returnStdout: true).trim()
           if ( params.customerName.trim().length() ){
             def sourceDir = "${customersDir}\\${params.customerName.trim()}\\_in"
             bat """
@@ -85,17 +85,17 @@ pipeline {
           def VER = params.edu ? "EDU" : "Pro"
           bat """
             if not exist "${destinationDir}" mkdir "${destinationDir}"
-            del /Q "${destinationDir}\\PIXet_${VER}_${pixetVersion}_Window_x86_64.zip"
-            del /Q "${destinationDir}\\PIXet_${VER}_${pixetVersion}_Windows_x86_64.exe"
-            copy /Y _build\\PixetWin64.zip "${destinationDir}\\PIXet_${VER}_${pixetVersion}_Window_x86_64.zip"
-            copy /Y _build\\PixetWin64\\setupX64.exe "${destinationDir}\\PIXet_${VER}_${pixetVersion}_Windows_x86_64.exe"
+            del /Q "${destinationDir}\\PIXet_${VER}_GUI_${pixetVersion}_Windows_x64.zip"
+            del /Q "${destinationDir}\\PIXet_${VER}_GUI_${pixetVersion}_Windows_x64.exe"
+            copy /Y _build\\PixetWin64.zip "${destinationDir}\\PIXet_${VER}_GUI_${pixetVersion}_Windows_x64.zip"
+            copy /Y _build\\PixetWin64\\setupX64.exe "${destinationDir}\\PIXet_${VER}_GUI_${pixetVersion}_Windows_x64.exe"
             """
           if (params.api) {
             bat """
-              del /Q "${destinationDir}\\API_PIXet_${VER}_${pixetVersion}_Windows_x86_64.zip"
-              copy /Y _build\\PixetAPIWin64.zip "${destinationDir}\\API_PIXet_${VER}_${pixetVersion}_Windows_x86_64.zip"
-              rem del /Q "${destinationDir}\\API_PIXet_${VER}_${pixetVersion}_Windows_x86.zip"
-              rem copy /Y _build\\PixetAPIWin32.zip "${destinationDir}\\API_PIXet_${VER}_${pixetVersion}_Windows_x86.zip"
+              del /Q "${destinationDir}\\PIXet_${VER}_API_${pixetVersion}_Windows_x64.zip"
+              copy /Y _build\\PixetAPIWin64.zip "${destinationDir}\\PIXet_${VER}_API_${pixetVersion}_Windows_x64.zip"
+              rem del /Q "${destinationDir}\\Pixet_${VER}_API_${pixetVersion}_Windows_x86.zip"
+              rem copy /Y _build\\PixetAPIWin32.zip "${destinationDir}\\Pixet_${VER}_API_${pixetVersion}_Windows_x86.zip"
               """            
           }
         }

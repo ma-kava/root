@@ -85,13 +85,13 @@ if exist %PACKAGE_DIR% rmdir %PACKAGE_DIR% /s /q
 mkdir %PACKAGE_DIR%\Pixet64
 
 rem copy actual pixet build to %PACKAGE_DIR%\Pixet
-for /f "tokens=* USEBACKQ" %%i in (`dir _build\PIXet_Pro*Win.zip /b`) do set BUILD_NAME=%%i
-for /f "tokens=* USEBACKQ" %%i in (`dir _build\PIXet_API*Win.zip /b`) do set API_NAME=%%i
+for /f "tokens=* USEBACKQ" %%i in (`powershell -Command "Get-ChildItem '_build' -Filter '*.zip' | Where-Object {$_.Name -cmatch '^Pixet_Pro.*Windows_x64\.zip$'} | Select-Object -ExpandProperty Name"`) do set BUILD_NAME=%%i
+for /f "tokens=* USEBACKQ" %%i in (`powershell -Command "Get-ChildItem '_build' -Filter '*.zip' | Where-Object {$_.Name -cmatch '^Pixet_API.*Windows_x64\.zip$'} | Select-Object -ExpandProperty Name"`) do set API_NAME=%%i
 echo found pixet build: %BUILD_NAME%
 echo found api build: %API_NAME%
 
-powershell -Command "Expand-Archive %BUILD_DIR%\PIXet_Pro*Win.zip %PACKAGE_DIR%\Pixet64"
-rem xcopy "%BUILD_DIR%\PIXet_Pro*Win.zip" "%PACKAGE_DIR%\Pixet64" /e /i /q /y
+powershell -Command "Expand-Archive '%BUILD_DIR%\%BUILD_NAME%' '%PACKAGE_DIR%\Pixet64'"
+rem xcopy "%BUILD_DIR%\Pixet_Pro*Windows_x64.zip" "%PACKAGE_DIR%\Pixet64" /e /i /q /y
 rem generate license, call generate_license.py
 python generate_license.py %defLic%
 copy /Y lic.info %PACKAGE_DIR%
@@ -128,7 +128,7 @@ IF "%zip%"=="true" (
 IF "%api%"=="true" (
    echo zipping api
    mkdir %PACKAGE_DIR%\api64
-   powershell -Command "Expand-Archive %BUILD_DIR%\PIXet_API*Win.zip %PACKAGE_DIR%\api64"
+   powershell -Command "Expand-Archive '%BUILD_DIR%\%API_NAME%' '%PACKAGE_DIR%\api64'"
    copy /Y %PACKAGE_DIR%\lic.info %PACKAGE_DIR%\api64
    7z a -tzip %BUILD_DIR%\PixetAPIWin64.zip "%WORKDIR%\%PACKAGE_DIR%\api64\*.*"
 

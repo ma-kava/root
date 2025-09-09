@@ -7,7 +7,7 @@ DISTRIB_BUILD_DIR=$BASE_DIR/_build
 API_DIR=$DISTRIB_BUILD_DIR/api
 
 PACKAGE_API="false"
-ARCHITECTURE="arm64"
+ARCHITECTURE="ARM64"
 
 PIXET_VERSION=""
 if [ -f "$BASE_DIR/src/common/ipixet.h" ]; then
@@ -19,11 +19,11 @@ LIC_NAME="Advacam s.r.o."
 
 while [ -n "$1" ]; do 
     case "$1" in
-	   arm32)
-	      ARCHITECTURE="arm32"
+       arm32)
+	      ARCHITECTURE="ARM32"
 		  ;;
 	   arm64)
-	      ARCHITECTURE="arm64"
+	      ARCHITECTURE="ARM64"
 		  ;;
        api)
           PACKAGE_API="true"
@@ -62,7 +62,7 @@ if [ -z "$PIXET_VERSION" ]; then
    exit -1
 fi
 
-zip_files=(${DISTRIB_BUILD_DIR}/*${ARCHITECTURE}*.zip)
+zip_files=(${DISTRIB_BUILD_DIR}/*Linux_${ARCHITECTURE}*.zip)
 if [ ! -f "${zip_files[0]}" ]; then 
 	echo ""
 	echo "no pixet zip files for ${ARCHITECTURE} in ${DISTRIB_BUILD_DIR} directory"
@@ -71,7 +71,7 @@ if [ ! -f "${zip_files[0]}" ]; then
 fi
 
 rm -rf ${API_DIR}
-rm -f ${DISTRIB_BUILD_DIR}/pixetAPI_${ARCHITECTURE}.*
+rm -f ${DISTRIB_BUILD_DIR}/Pixet_API_${ARCHITECTURE}.*
 
 ./generate_license.py "$LIC_NAME"
 #mv lic.info ${PACKAGE_DIR} 
@@ -85,9 +85,9 @@ if [ "$PACKAGE_API" = "true" ]; then
 	unzip  "${DISTRIB_BUILD_DIR}/*${ARCHITECTURE}*" -d  ${API_DIR}
 	cp lic.info ${API_DIR}
 	cd ${API_DIR}
-	
-	tar -czf ${DISTRIB_BUILD_DIR}/pixetAPI_${ARCHITECTURE}.tar.gz *
-	
+
+	tar -czf ${DISTRIB_BUILD_DIR}/Pixet_API_Linux_${ARCHITECTURE}.tar.gz *
+
 	cd ${BASE_DIR}
     rm -rf ${API_DIR}
 fi

@@ -34,8 +34,8 @@ pipeline {
           def lastPixetBuild = sh (script: """ls -d ${pixetBuildsDir}/*/ | sort -r | head -1""", returnStdout: true).trim()
           sh """
             mkdir -p _build/devices_configs
-            if [ "${lastPixetBuild}/*arm64.zip" ]; then 
-               cp ${lastPixetBuild}/*arm64.zip _build
+            if [ "${lastPixetBuild}/*Linux_ARM64.zip" ]; then 
+               cp ${lastPixetBuild}/*Linux_ARM64.zip _build
             fi
             """
           pixetVersion = sh( script: """ls _build/*64.zip | grep -o \'[0-9]*\\.[0-9]*\\.[0-9]*\'""", returnStdout: true).trim()
@@ -65,8 +65,8 @@ pipeline {
           def VER = params.edu ? "EDU" : "Pro"
           sh """
             mkdir -p ${destinationDir} 
-            rm -f ${destinationDir}/API_PIXet_${VER}_${pixetVersion}_ARM64.tar.gz
-            cp _build/pixetAPI_arm64.tar.gz ${destinationDir}/API_PIXet_${VER}_${pixetVersion}_ARM64.tar.gz
+            rm -f ${destinationDir}/PIXet_${VER}_API_${pixetVersion}_Linux_ARM64.tar.gz
+            cp _build/Pixet_API_Linux_ARM64.tar.gz ${destinationDir}/PIXet_${VER}_API_${pixetVersion}_Linux_ARM64.tar.gz
             """            
         }
       }

@@ -6,7 +6,7 @@ def pixetVersion = "0.0.0"
 
 pipeline {
   agent {
-    label 'mac_x64' 
+    label 'mac_arm64' 
   }
 
   options {
@@ -63,14 +63,14 @@ pipeline {
                 cd _build
                 /usr/local/bin/sshpass -p "\$SFTP_PASS" sftp -o StrictHostKeyChecking=no \$SFTP_USER@nox2 << EOF
                 cd ${pixetBuildsDir}/${lastPixetBuild}
-                get *Mac.zip
+                get *Darwin_x64_ARM64.zip
                 bye
                EOF
                cd ..
             """
           }
 
-          pixetVersion = sh( script: """ls _build/PIXet_Pro*Mac.zip | grep -o \'[0-9]*\\.[0-9]*\\.[0-9]*\'""", returnStdout: true).trim()
+          pixetVersion = sh( script: """ls _build/Pixet_API_*Darwin_x64_ARM64.zip | grep -o \'[0-9]*\\.[0-9]*\\.[0-9]*\'""", returnStdout: true).trim()
 
           if ( params.customerName.trim().length() ){
             def sourceDir = customersDir + "/" + params.customerName.trim().replaceAll(" ","\\\\ ") + "/_in"
@@ -137,8 +137,8 @@ pipeline {
             
             sh """
                 /usr/local/bin/sshpass -p "\$SFTP_PASS" sftp -o StrictHostKeyChecking=no \$SFTP_USER@nox2 << EOF
-                rm ${destinationDir}/PIXet_${VER}_${pixetVersion}_Mac.dmg
-                put _build/*.dmg ${destinationDir}/PIXet_${VER}_${pixetVersion}_Mac.dmg
+                rm ${destinationDir}/PIXet_${VER}_GUI_${pixetVersion}_Darwin_x64_ARM64.dmg
+                put _build/*.dmg ${destinationDir}/PIXet_${VER}_GUI_${pixetVersion}_Darwin_x64_ARM64.dmg
                 bye
                 EOF
             """          
@@ -146,8 +146,8 @@ pipeline {
             if (params.api) {
               sh """
                   /usr/local/bin/sshpass -p "\$SFTP_PASS" sftp -o StrictHostKeyChecking=no \$SFTP_USER@nox2 << EOF
-                  rm ${destinationDir}/API_PIXet_${VER}_${pixetVersion}_Mac.zip
-                  put _build/pixetAPI.zip ${destinationDir}/API_PIXet_${VER}_${pixetVersion}_Mac.zip
+                  rm ${destinationDir}/IXet_${VER}_API_${pixetVersion}_Darwin_x64_ARM64.zip
+                  put _build/Pixet_API.zip ${destinationDir}/PIXet_${VER}_API_${pixetVersion}_Darwin_x64_ARM64.zip
                   bye
                   EOF
               """ 
