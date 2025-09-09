@@ -108,9 +108,9 @@ if [ "$PACKAGE_DEB" = "true" ]; then
 
 	DEB_PIXET_DIR=${PACKAGE_DIR}/deb/pixet/opt/pixet
 	mkdir -p ${DEB_PIXET_DIR}
-	unzip "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  ${DEB_PIXET_DIR}
+	unzip -q "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  ${DEB_PIXET_DIR}
 
-	python "purge_pixet.py" --plugin-dir ${DEB_PIXET_DIR}/plugins --version ${PLUGINS_SET} --platform Linux_x64 --xml-config plugin_cookbook.xml
+	python "purge_pixet.py" --build-dir ${DEB_PIXET_DIR} --version ${PLUGINS_SET} --platform Linux_x64 --xml-config plugin_cookbook.xml
 
 	if [ "$PACKAGE_EDU" = "true" ]; then
 		sed -i 's/;MainUi=devcontrol/MainUi=eduview/' ${DEB_PIXET_DIR}/pixet.ini
@@ -150,9 +150,9 @@ if [ "$PACKAGE_RPM" = "true" ]; then
 
 	RMP_PIXET_DIR=${PACKAGE_DIR}/rpm/pixet/BUILDROOT/pixet/opt/pixet
 	mkdir -p ${RMP_PIXET_DIR}
-	unzip  "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  ${RMP_PIXET_DIR}
+	unzip -q "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  ${RMP_PIXET_DIR}
 
-	python "purge_pixet.py" --plugin-dir ${RMP_PIXET_DIR}/plugins --version ${PLUGINS_SET} --platform Linux_x64 --xml-config plugin_cookbook.xml
+	python "purge_pixet.py" --build-dir ${RMP_PIXET_DIR} --version ${PLUGINS_SET} --platform Linux_x64 --xml-config plugin_cookbook.xml
 
 	if [ "$PACKAGE_EDU" = "true" ]; then
 		sed -i 's/;MainUi=devcontrol/MainUi=eduview/' ${RMP_PIXET_DIR}/pixet.ini
@@ -190,9 +190,9 @@ if [ "$PACKAGE_TARGZ" = "true" ]; then
 
 	ZIP_PIXET_DIR=${PACKAGE_DIR}/zip/pixet
 	mkdir -p ${ZIP_PIXET_DIR}
-	unzip  "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  ${ZIP_PIXET_DIR}
+	unzip -q "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  ${ZIP_PIXET_DIR}
 
-	python "purge_pixet.py" --plugin-dir ${ZIP_PIXET_DIR}/plugins --version ${PLUGINS_SET} --platform Linux_x64 --xml-config plugin_cookbook.xml
+	python "purge_pixet.py" --build-dir ${ZIP_PIXET_DIR} --version ${PLUGINS_SET} --platform Linux_x64 --xml-config plugin_cookbook.xml
 
 	if [ "$PACKAGE_EDU" = "true" ]; then
 		sed -i 's/;MainUi=devcontrol/MainUi=eduview/' ${ZIP_PIXET_DIR}/pixet.ini
@@ -230,9 +230,9 @@ if [ "$PACKAGE_API" = "true" ]; then
 
 	API_DIR=${PACKAGE_DIR}/api
 	mkdir -p ${API_DIR}
-	unzip  "${DISTRIB_BUILD_DIR}/Pixet_API*" -d  ${API_DIR}
+	unzip -q "${DISTRIB_BUILD_DIR}/Pixet_API*" -d  ${API_DIR}
 
-	python "purge_pixet.py" --plugin-dir ${API_DIR}/plugins --version ${PLUGINS_SET} --platform Linux_x64 --xml-config plugin_cookbook.xml
+	python "purge_pixet.py" --build-dir ${API_DIR} --version ${PLUGINS_SET} --platform Linux_x64 --xml-config plugin_cookbook.xml
 	
 	cp ${PACKAGE_DIR}/lic.info ${API_DIR}
 	cd ${API_DIR}
