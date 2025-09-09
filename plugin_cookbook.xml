@@ -47,21 +47,13 @@
             </plugins_to_exclude>
 		</external>
 
-        <EDU>
+        <edu>
             <plugins_to_exclude>
 
                 <plugin name="devcontrol" />
-                <plugin name="devicemonitor" />
-                <plugin name="devtest" />
-                <plugin name="eduview" />
-                <plugin name="equalization" />
-                <plugin name="frameviewer" />
-                <plugin name="fwflasher" />
-                <plugin name="geigerview" />
-                <plugin name="hdf5io" />
 
             </plugins_to_exclude>
-        </EDU>
+        </edu>
 
 
 	</versions>

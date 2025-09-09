@@ -18,6 +18,8 @@ if [ -f "$BASE_DIR/src/common/ipixet.h" ]; then
    PIXET_VERSION=`grep PX_PIXET_VERSION "$BASE_DIR/src/common/ipixet.h" | grep -oP "\".*\"" | sed 's/\"//g'`
 fi
 
+PLUGINS_SET="internal"
+
 CHOSEN_ONE="false"
 LIC_NAME="Advacam s.r.o."
 
@@ -50,6 +52,10 @@ while [ -n "$1" ]; do
        -pversion)
           shift
           PIXET_VERSION="$1"
+          ;;
+		-plugins)
+          shift
+          PLUGINS_SET="$1"
           ;;
        *)
           echo "Option $1 not recognized"
@@ -104,7 +110,7 @@ if [ "$PACKAGE_DEB" = "true" ]; then
 	mkdir -p ${DEB_PIXET_DIR}
 	unzip "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  ${DEB_PIXET_DIR}
 
-	python "purge_pixet.py" --plugin-dir ${DEB_PIXET_DIR}/plugins --version EDU --platform Linux_x64 --xml-config plugin_cookbook.xml
+	python "purge_pixet.py" --plugin-dir ${DEB_PIXET_DIR}/plugins --version ${PLUGINS_SET} --platform Linux_x64 --xml-config plugin_cookbook.xml
 
 	if [ "$PACKAGE_EDU" = "true" ]; then
 		sed -i 's/;MainUi=devcontrol/MainUi=eduview/' ${DEB_PIXET_DIR}/pixet.ini
@@ -146,7 +152,7 @@ if [ "$PACKAGE_RPM" = "true" ]; then
 	mkdir -p ${RMP_PIXET_DIR}
 	unzip  "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  ${RMP_PIXET_DIR}
 
-	python "purge_pixet.py" --plugin-dir ${RMP_PIXET_DIR}/plugins --version EDU --platform Linux_x64 --xml-config plugin_cookbook.xml
+	python "purge_pixet.py" --plugin-dir ${RMP_PIXET_DIR}/plugins --version ${PLUGINS_SET} --platform Linux_x64 --xml-config plugin_cookbook.xml
 
 	if [ "$PACKAGE_EDU" = "true" ]; then
 		sed -i 's/;MainUi=devcontrol/MainUi=eduview/' ${RMP_PIXET_DIR}/pixet.ini
@@ -186,7 +192,7 @@ if [ "$PACKAGE_TARGZ" = "true" ]; then
 	mkdir -p ${ZIP_PIXET_DIR}
 	unzip  "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  ${ZIP_PIXET_DIR}
 
-	python "purge_pixet.py" --plugin-dir ${ZIP_PIXET_DIR}/plugins --version EDU --platform Linux_x64 --xml-config plugin_cookbook.xml
+	python "purge_pixet.py" --plugin-dir ${ZIP_PIXET_DIR}/plugins --version ${PLUGINS_SET} --platform Linux_x64 --xml-config plugin_cookbook.xml
 
 	if [ "$PACKAGE_EDU" = "true" ]; then
 		sed -i 's/;MainUi=devcontrol/MainUi=eduview/' ${ZIP_PIXET_DIR}/pixet.ini
@@ -226,7 +232,7 @@ if [ "$PACKAGE_API" = "true" ]; then
 	mkdir -p ${API_DIR}
 	unzip  "${DISTRIB_BUILD_DIR}/Pixet_API*" -d  ${API_DIR}
 
-	python "purge_pixet.py" --plugin-dir ${API_DIR}/plugins --version EDU --platform Linux_x64 --xml-config plugin_cookbook.xml
+	python "purge_pixet.py" --plugin-dir ${API_DIR}/plugins --version ${PLUGINS_SET} --platform Linux_x64 --xml-config plugin_cookbook.xml
 	
 	cp ${PACKAGE_DIR}/lic.info ${API_DIR}
 	cd ${API_DIR}

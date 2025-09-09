@@ -34,7 +34,7 @@ def remove_plugins(list, plugin_dir, platform):
 
     for plugin in list:
         path = os.path.join(os.getcwd(), plugin_dir, f"{plugin}.{extension}")
-        print(f"deleting plugin {plugin}.{extension}")
+        print(f"removing plugin {plugin}.{extension}")
         os.remove(path)
 
 if __name__ == '__main__':
