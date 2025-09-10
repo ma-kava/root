@@ -14,6 +14,7 @@ PACKAGE_ZIP="false"
 PACKAGE_EDU="false"
 PACKAGE_API="false"
 
+PLUGINS_SET="internal"
 PIXET_VERSION=""
 if [ -f "$BASE_DIR/src/common/ipixet.h" ]; then
    PIXET_VERSION=`grep PX_PIXET_VERSION "$BASE_DIR/src/common/ipixet.h" | grep -o "\".*\"" | sed 's/\"//g'`
@@ -43,6 +44,10 @@ while [ -n "$1" ]; do
        -pversion)
           shift
           PIXET_VERSION="$1"
+          ;;
+       -plugins)
+          shift
+          PLUGINS_SET="$1"
           ;;
        *)
           echo "Option $1 not recognized"
@@ -86,6 +91,8 @@ if [ "$PACKAGE_DMG" = "true" ]; then
     mkdir -vp "${PACKAGE_DIR}/Contents/Resources"
    
     unzip "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  "${PIXET_DIR}"
+
+    python "purge_pixet.py" --build-dir ${PIXET_DIR} --version ${PLUGINS_SET} --platform Darwin_x64_ARM64 --xml-config plugin_cookbook.xml 
 
 	if [ "$PACKAGE_EDU" = "true" ]; then
 		sed -i '' 's/;MainUi=devcontrol/MainUi=eduview/' "${PIXET_DIR}/pixet.ini"

@@ -25,6 +25,9 @@ pipeline {
     booleanParam(name: 'edu', 
       defaultValue: false,
       description: "Create EDU version of the package.")
+    choice(name: 'plugins_set',
+      choices: ['external', 'internal', 'edu'],
+      description: "Choose version.")
    }
 
   environment {
@@ -99,7 +102,7 @@ pipeline {
             packagerParams = packagerParams + " -lic ";
           }
           sh """
-             ./package_mac.sh -pversion ${pixetVersion} ${packagerParams} "${params.customerName.trim()}"
+             ./package_mac.sh -pversion ${pixetVersion} ${packagerParams} "${params.customerName.trim()} -plugins ${params.plugins_set}"
              """    
         }
       }
