@@ -92,7 +92,7 @@ if [ "$PACKAGE_DMG" = "true" ]; then
    
     unzip "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  "${PIXET_DIR}"
 
-    python "purge_pixet.py" --build-dir ${PIXET_DIR} --version ${PLUGINS_SET} --platform Darwin_x64_ARM64 --xml-config plugin_cookbook.xml 
+    python3 "purge_pixet.py" --build-dir ${PIXET_DIR} --version ${PLUGINS_SET} --platform Darwin_x64_ARM64 --xml-config plugin_cookbook.xml 
 
 	if [ "$PACKAGE_EDU" = "true" ]; then
 		sed -i '' 's/;MainUi=devcontrol/MainUi=eduview/' "${PIXET_DIR}/pixet.ini"
