@@ -25,6 +25,9 @@ pipeline {
     booleanParam(name: 'edu', 
       defaultValue: false,
       description: "Create EDU version of the package.")
+    choice(name: 'plugins_set',
+      choices: ['external', 'internal', 'edu'],
+      description: "Choose version.")
    }
 
   environment {
@@ -69,7 +72,7 @@ pipeline {
           if (params.customerName.trim().length()) {
             packagerParams = packagerParams + " -lic \"" + params.customerName.trim() + "\"";
           }          
-          bat "package_windows.bat -pversion ${pixetVersion} ${packagerParams}"    
+          bat "package_windows.bat -pversion ${pixetVersion} ${packagerParams} -plugins ${params.plugins_set}"    
         }
       }
     }

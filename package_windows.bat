@@ -14,6 +14,7 @@ SET "zip=false"
 SET "edu=false"
 SET "inno=false"
 SET "defLic=Advacam s.r.o."
+SET PLUGINS_SET="internal"
 SET PIXET_VERSION=""
 
 IF EXIST "%WORKDIR%\src\common\ipixet.h" (
@@ -59,6 +60,12 @@ SET "selectedOne=false"
    )
    IF "%1"=="-pversion" ( 
       SET PIXET_VERSION=%2
+      SHIFT
+      SHIFT
+      GOTO Loop 
+   )
+   IF "%1"=="-plugins" ( 
+      SET PLUGINS_SET=%2
       SHIFT
       SHIFT
       GOTO Loop 
@@ -110,6 +117,9 @@ echo "factory config dir" > %PACKAGE_DIR%\Pixet64\factory\info.txt
 rem 7 args for robocopy just to make it silent
 robocopy "_build\devices_configs" "%PACKAGE_DIR%\Pixet64\configs" /xf .gitignore  /NFL /NDL /NJH /NJS /nc /ns /np
 robocopy "_build\devices_configs" "%PACKAGE_DIR%\Pixet64\factory" /xf .gitignore  /NFL /NDL /NJH /NJS /nc /ns /np
+
+REM Remove unwanted plugins
+python purge_pixet.py --build-dir "%PACKAGE_DIR%\Pixet64" --xml-config "plugin_cookbook.xml" --version %PLUGINS_SET% --platform Windows_x64
 
 IF "%inno%"=="true" (
    echo Running innosetup
