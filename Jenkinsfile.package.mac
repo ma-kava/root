@@ -102,7 +102,7 @@ pipeline {
             packagerParams = packagerParams + " -lic ";
           }
           sh """
-             ./package_mac.sh -pversion ${pixetVersion} ${packagerParams} "${params.customerName.trim()} -plugins ${params.plugins_set}"
+             ./package_mac.sh -pversion ${pixetVersion} ${packagerParams} ${params.customerName.trim()} -plugins ${params.plugins_set}
              """    
         }
       }
