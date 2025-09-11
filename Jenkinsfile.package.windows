@@ -90,8 +90,8 @@ pipeline {
             if not exist "${destinationDir}" mkdir "${destinationDir}"
             del /Q "${destinationDir}\\PIXet_${VER}_GUI_${pixetVersion}_Windows_x64.zip"
             del /Q "${destinationDir}\\PIXet_${VER}_GUI_${pixetVersion}_Windows_x64.exe"
-            copy /Y _build\\PixetWin64.zip "${destinationDir}\\PIXet_${VER}_GUI_${pixetVersion}_Windows_x64.zip"
-            copy /Y _build\\PixetWin64\\setupX64.exe "${destinationDir}\\PIXet_${VER}_GUI_${pixetVersion}_Windows_x64.exe"
+            copy /Y _build\\PixetWin64.zip "${destinationDir}\\TEST_DO_NOT_USE_PIXet_${VER}_GUI_${pixetVersion}_Windows_x64.zip"
+            copy /Y _build\\PixetWin64\\setupX64.exe "${destinationDir}\\TEST_DO_NOT_USE_PIXet_${VER}_GUI_${pixetVersion}_Windows_x64.exe"
             """
           if (params.api) {
             bat """

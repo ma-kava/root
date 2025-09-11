@@ -141,7 +141,7 @@ pipeline {
             sh """
                 /usr/local/bin/sshpass -p "\$SFTP_PASS" sftp -o StrictHostKeyChecking=no \$SFTP_USER@nox2 << EOF
                 rm ${destinationDir}/PIXet_${VER}_GUI_${pixetVersion}_Darwin_x64_ARM64.dmg
-                put _build/*.dmg ${destinationDir}/PIXet_${VER}_GUI_${pixetVersion}_Darwin_x64_ARM64.dmg
+                put _build/*.dmg ${destinationDir}/_TEST_DO_NOT_USE_PIXet_${VER}_GUI_${pixetVersion}_Darwin_x64_ARM64.dmg
                 bye
                 EOF
             """          
