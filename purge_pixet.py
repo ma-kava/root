@@ -5,6 +5,7 @@ import os
 EXTENSIONS = {
     'Windows_x64': 'dll',
     'Linux_x64': 'so',
+    'Darwin_x64_ARM64': 'so'
 }
 
 def parseInputParameters():
@@ -13,7 +14,7 @@ def parseInputParameters():
     requiredNamed = parser.add_argument_group('required named arguments')
     requiredNamed.add_argument('--xml-config', help='configuration xml file', required=True)        
     requiredNamed.add_argument('--distrib-version', help='version of PIXet to package', required=True)        
-    requiredNamed.add_argument('--platform', choices=['Linux_x64', 'Windows_x64'], required=True)                        
+    requiredNamed.add_argument('--platform', choices=['Linux_x64', 'Windows_x64', 'Darwin_x64_ARM64'], required=True)                        
 
     return parser.parse_args()
 
@@ -41,7 +42,7 @@ def remove_files(exclude_dict, dir_dict, platform):
         print(f"Excluding some {key} from {dir_dict[key]}...")
         for name in exclude_dict[key]:
             path = os.path.join(os.getcwd(), dir_dict[key], f"{name}.{extension}")
-            print(f"  - removing '{name}.{extension}'")
+            print(f"  - removing {key.removesuffix('s')} '{name}.{extension}'")
             try:
                 os.remove(path)
             except FileNotFoundError:
@@ -77,13 +78,14 @@ def generate_new_ini_lines(lines, remaining_files, extension, ini_path):
             in_section = True
         if not in_section:
             new_lines.append(line)
+
     for section, key, label in [("Hwlibs", "hwlibs", "Hwlib"), ("Plugins", "plugins", "Plugin")]:
         print(f"Updating [{section}] section in {ini_path}...")
         new_lines.append(f'[{section}]\n')
         for name in sorted(remaining_files[key]):
             path = os.path.join(section.lower(), f"{name}.{extension}")
             new_lines.append(f"{label}={path}\n")
-            print(f"  + Adding {key.removesuffix('s')} '{name}' to pixet.ini")
+            print(f"  + Adding {key.removesuffix('s')} '{name}.{extension}' to pixet.ini")
         new_lines.append('\n')
     return new_lines
 
