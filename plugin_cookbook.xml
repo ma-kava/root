@@ -30,32 +30,95 @@
         <plugin name="xraybox" />
     </plugins>
 
-	<versions>
+    <hwlibs>
+        <hwlib name="abrd-hwlib" /> 
+        <hwlib name="comet" /> 
+        <hwlib name="composite" /> 
+        <hwlib name="cub" /> 
+        <hwlib name="dummy" /> 
+        <hwlib name="dxs" /> 
+        <hwlib name="fitpix" /> 
+        <hwlib name="ftdicheck" /> 
+        <hwlib name="hvsrc" /> 
+        <hwlib name="minipix" /> 
+        <hwlib name="minix" /> 
+        <hwlib name="net" /> 
+        <hwlib name="poscontroller" /> 
+        <hwlib name="spellmanhv" /> 
+        <hwlib name="usb" /> 
+        <hwlib name="widepix" /> 
+        <hwlib name="zem" /> 
+        <hwlib name="zest" />
+    </hwlibs>
+
+	<distribution_version>
         <internal>
             <plugins_to_exclude>
-                
-                <plugin name="updatemgr" />
-
+                <plugin name="advaquad" />
+                <plugin name="ccrates" />
+                <plugin name="livepreview" />
+                <plugin name="measmgr" />
+                <plugin name="meastpx3" />
+                <plugin name="measutils" />
+                <plugin name="neutronimg" />
+                <plugin name="remotectrl" />
+                <plugin name="tpx3data" />
+                <plugin name="xraybox" />
+                <plugin name="geigerview" />
             </plugins_to_exclude>
+
+            <hwlibs_to_exclude>
+                <hwlib name="spellmanhv" />
+                <hwlib name="composite" />
+                <hwlib name="abrd-hwlib" />
+            </hwlibs_to_exclude>
         </internal>
 
 		<external>
             <plugins_to_exclude>
-
+                <plugin name="advaquad" />
+                <plugin name="ccrates" />
+                <plugin name="livepreview" />
+                <plugin name="measmgr" />
+                <plugin name="meastpx3" />
+                <plugin name="measutils" />
                 <plugin name="neutronimg" />
-                
+                <plugin name="remotectrl" />
+                <plugin name="tpx3data" />
+                <plugin name="xraybox" />
+                <plugin name="geigerview" />
             </plugins_to_exclude>
+
+            <hwlibs_to_exclude>
+                <hwlib name="spellmanhv" />
+                <hwlib name="composite" />
+                <hwlib name="abrd-hwlib" />
+            </hwlibs_to_exclude>
 		</external>
 
         <edu>
             <plugins_to_exclude>
-
-                <plugin name="devcontrol" />
-
+                <plugin name="advaquad" />
+                <plugin name="ccrates" />
+                <plugin name="livepreview" />
+                <plugin name="measmgr" />
+                <plugin name="meastpx3" />
+                <plugin name="measutils" />
+                <plugin name="neutronimg" />
+                <plugin name="remotectrl" />
+                <plugin name="tpx3data" />
+                <plugin name="xraybox" />
+                <plugin name="geigerview" />
             </plugins_to_exclude>
+
+            <hwlibs_to_exclude>
+                <hwlib name="spellmanhv" />
+                <hwlib name="composite" />
+                <hwlib name="abrd-hwlib" />
+            </hwlibs_to_exclude>
         </edu>
 
 
-	</versions>
+	</distribution_version>
 
 </Pixet>

@@ -14,7 +14,7 @@ PACKAGE_ZIP="false"
 PACKAGE_EDU="false"
 PACKAGE_API="false"
 
-PLUGINS_SET="internal"
+DISTRIBUTION_VERSION="internal"
 PIXET_VERSION=""
 if [ -f "$BASE_DIR/src/common/ipixet.h" ]; then
    PIXET_VERSION=`grep PX_PIXET_VERSION "$BASE_DIR/src/common/ipixet.h" | grep -o "\".*\"" | sed 's/\"//g'`
@@ -45,9 +45,9 @@ while [ -n "$1" ]; do
           shift
           PIXET_VERSION="$1"
           ;;
-       -plugins)
+       -distribution_version)
           shift
-          PLUGINS_SET="$1"
+          DISTRIBUTION_VERSION="$1"
           ;;
        *)
           echo "Option $1 not recognized"
@@ -90,9 +90,9 @@ if [ "$PACKAGE_DMG" = "true" ]; then
     mkdir -vp "${PACKAGE_DIR}/Contents/MacOS" 
     mkdir -vp "${PACKAGE_DIR}/Contents/Resources"
    
-    unzip "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  "${PIXET_DIR}"
+    unzip -q "${DISTRIB_BUILD_DIR}/Pixet_Pro*" -d  "${PIXET_DIR}"
 
-    python3 "purge_pixet.py" --build-dir "${PIXET_DIR}" --version ${PLUGINS_SET} --platform Darwin_x64_ARM64 --xml-config plugin_cookbook.xml 
+    python3 "purge_pixet.py" --build-dir "${PIXET_DIR}" --distrib-version ${DISTRIBUTION_VERSION} --platform Darwin_x64_ARM64 --xml-config plugin_cookbook.xml 
 
 	if [ "$PACKAGE_EDU" = "true" ]; then
 		sed -i '' 's/;MainUi=devcontrol/MainUi=eduview/' "${PIXET_DIR}/pixet.ini"
@@ -181,7 +181,7 @@ if [ "$PACKAGE_API" = "true" ]; then
     rm -rf "${API_DIR}"    
     mkdir -p "${API_DIR}"
 
-    unzip "${DISTRIB_BUILD_DIR}"/Pixet_API* -d  "${API_DIR}"
+    unzip -q "${DISTRIB_BUILD_DIR}"/Pixet_API* -d  "${API_DIR}"
     cp lic.info "${API_DIR}" 
 
     zip -j "${DISTRIB_BUILD_DIR}"/Pixet_API.zip "${API_DIR}"/*

@@ -2,82 +2,116 @@ import xml.etree.ElementTree as ET
 import argparse
 import os
 
+EXTENSIONS = {
+    'Windows_x64': 'dll',
+    'Linux_x64': 'so',
+}
+
 def parseInputParameters():
     parser = argparse.ArgumentParser(description='Removing some plugins.')
     parser.add_argument('--build-dir', action='store', default='_build/Pixet', help='path to directory containing PIXet build files')
     requiredNamed = parser.add_argument_group('required named arguments')
     requiredNamed.add_argument('--xml-config', help='configuration xml file', required=True)        
-    requiredNamed.add_argument('--version', help='version of PIXet to package', required=True)        
-    requiredNamed.add_argument('--platform', choices=['Linux_x64', 'Linux_ARM32','Linux_ARM64', 'Windows_x64', 'Darwin_x64_ARM64'], required=True)                        
+    requiredNamed.add_argument('--distrib-version', help='version of PIXet to package', required=True)        
+    requiredNamed.add_argument('--platform', choices=['Linux_x64', 'Windows_x64'], required=True)                        
 
     return parser.parse_args()
 
-def read_plugins_list(file_name, pixet_version):
+def read_xml(file_name, pixet_version):
     tree = ET.parse(file_name)
     root = tree.getroot()
 
     ver = root.find(f'.//{pixet_version}')
     plugin_list = ver.find('plugins_to_exclude')
+    hwlib_list = ver.find('hwlibs_to_exclude')
 
-    ret = []
+    ret = {
+        'plugins': [],
+        'hwlibs': []
+    }
     for plugin in plugin_list.iter('plugin'):
-        ret.append(plugin.attrib['name'])
-
+        ret['plugins'].append(plugin.attrib['name'])
+    for hwlib in hwlib_list.iter('hwlib'):
+        ret['hwlibs'].append(hwlib.attrib['name'])
     return ret
 
-def remove_plugins(list, build_dir, platform):
-    extension = 'dll' if 'Windows' in platform else 'so'
+def remove_files(exclude_dict, dir_dict, platform):
+    extension = EXTENSIONS[platform]
+    for key in exclude_dict:
+        print(f"Excluding some {key} from {dir_dict[key]}...")
+        for name in exclude_dict[key]:
+            path = os.path.join(os.getcwd(), dir_dict[key], f"{name}.{extension}")
+            print(f"  - removing '{name}.{extension}'")
+            try:
+                os.remove(path)
+            except FileNotFoundError:
+                print(f"    File not found: {path}")
 
-    print(f"Excluding some plugins from {build_dir}/plugins...")
-    for plugin in list:
-        path = os.path.join(os.getcwd(), build_dir, f"{plugin}.{extension}")
-        print(f"  - removing '{plugin}.{extension}'")
-        os.remove(path)
+def get_remaining_files(dir_dict, extension):
+    remaining_files = {
+        'plugins': [],
+        'hwlibs': []
+    }
+    # read all remaining hwlibs and plugins in package
+    for key in dir_dict: # key is either 'hwlibs' or 'plugins'
+        for filename in os.listdir(dir_dict[key]):
+            file_name = os.path.splitext(filename)[0]
+            remaining_files[key].append(file_name)
+    return remaining_files
 
-def modify_pixet_ini(build_dir, plugin_dir, platform):
-    ini_path = os.path.join(build_dir, 'pixet.ini')
-    extension = 'dll' if 'Windows' in platform else 'so'
-    
-    remaining_plugins = []
-    for filename in os.listdir(plugin_dir):
-        if filename.endswith(extension):
-            plugin_name = os.path.splitext(filename)[0]
-            remaining_plugins.append(plugin_name)
+def read_ini_file(ini_path):
+    try:
+        with open(ini_path, 'r') as f:
+            print(f"Successfully opened {ini_path} for reading.")
+            return f.readlines()
+    except Exception as e:
+        print(f"Failed to open {ini_path} for reading: {e}")
+        return None
 
-    with open(ini_path, 'r') as f:
-        lines = f.readlines()
-
+def generate_new_ini_lines(lines, remaining_files, extension, ini_path):
     new_lines = []
-    in_plugins_section = False
+    in_section = False
     for line in lines:
         stripped_line = line.strip()
-        if stripped_line.lower() == '[plugins]':
-            in_plugins_section = True
-        elif stripped_line.startswith('[') and stripped_line.endswith(']'):
-            in_plugins_section = False
-        
-        if not in_plugins_section:
+        if stripped_line.lower() == '[hwlibs]':
+            in_section = True
+        if not in_section:
             new_lines.append(line)
+    for section, key, label in [("Hwlibs", "hwlibs", "Hwlib"), ("Plugins", "plugins", "Plugin")]:
+        print(f"Updating [{section}] section in {ini_path}...")
+        new_lines.append(f'[{section}]\n')
+        for name in sorted(remaining_files[key]):
+            path = os.path.join(section.lower(), f"{name}.{extension}")
+            new_lines.append(f"{label}={path}\n")
+            print(f"  + Adding {key.removesuffix('s')} '{name}' to pixet.ini")
+        new_lines.append('\n')
+    return new_lines
 
-    # Add the new [Plugins] section at the end
-    print(f"Updating [Plugins] section in {ini_path}...")
-    new_lines.append('[Plugins]\n')
-    for plugin_name in sorted(remaining_plugins):
-        # The original format was Plugin=plugins\plugin.dll
-        plugin_path = f"plugins\\{plugin_name}.{extension}".replace('/', '\\')
-        new_lines.append(f"Plugin={plugin_path}\n")
-        print(f"  + Adding '{plugin_name}' to pixet.ini")
+def write_ini_file(ini_path, new_lines):
+    try:
+        with open(ini_path, 'w') as f:
+            print(f"Successfully opened {ini_path} for writing.")
+            f.writelines(new_lines)
+    except Exception as e:
+        print(f"Failed to open {ini_path} for writing: {e}")
+        return
 
-    # Write the changes back to the file
-    with open(ini_path, 'w') as f:
-        f.writelines(new_lines)
+def modify_pixet_ini(build_dir, dir_dict, platform):
+    ini_path = os.path.join(build_dir, 'pixet.ini')
+    extension = EXTENSIONS[platform]
+    remaining_files = get_remaining_files(dir_dict, extension)
+    lines = read_ini_file(ini_path)
+    if lines is None:
+        return
+    new_lines = generate_new_ini_lines(lines, remaining_files, extension, ini_path)
+    write_ini_file(ini_path, new_lines)
 
 if __name__ == '__main__':
     args = parseInputParameters()
-
-    plugins_to_exclude = read_plugins_list(args.xml_config, args.version)
-
-    plugin_dir = os.path.join(args.build_dir, 'plugins')
-    remove_plugins(plugins_to_exclude, plugin_dir, args.platform)
-
-    modify_pixet_ini(args.build_dir, plugin_dir, args.platform)
+    exclude_dict = read_xml(args.xml_config, args.distrib_version)
+    dir_dict = {
+        'plugins': os.path.join(args.build_dir, 'plugins'),
+        'hwlibs': os.path.join(args.build_dir, 'hwlibs')
+    }
+    remove_files(exclude_dict, dir_dict, args.platform)
+    modify_pixet_ini(args.build_dir, dir_dict, args.platform)
