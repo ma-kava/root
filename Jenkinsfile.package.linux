@@ -74,7 +74,7 @@ pipeline {
             packagerParams = packagerParams + " -lic \\\"" + params.customerName.trim() + "\\\"";
           }
           sh """
-             docker run --rm --user 1001:1001 -v "${workspacePath}":/opt/PixetPackage:Z -t ubuntu22.04dev_64 bash -c "cd /opt/PixetPackage; bash ./package_linux.sh -pversion ${pixetVersion} ${packagerParams} -distribution-version ${params.distribution_version}"
+             docker run --rm --user 1001:1001 -v "${workspacePath}":/opt/PixetPackage:Z -t ubuntu22.04dev_64 bash -c "cd /opt/PixetPackage; bash ./package_linux.sh -pversion ${pixetVersion} ${packagerParams} -distribution_version ${params.distribution_version}"
              """    
         }
       }

@@ -53,7 +53,7 @@ while [ -n "$1" ]; do
           shift
           PIXET_VERSION="$1"
           ;;
-		-distribution-version)
+		-distribution_version)
           shift
           DISTRIBUTION_VERSION="$1"
           ;;
