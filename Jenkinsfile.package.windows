@@ -107,9 +107,9 @@ pipeline {
   }
 
   post {
-    unsuccessful {
-      slackSend channel:  "#jenkins", message: "PIXet packaging for windows failed.\n <${currentBuild.absoluteUrl}|${currentBuild.absoluteUrl}>"
-    }
+    // unsuccessful {
+    //   slackSend channel:  "#jenkins", message: "PIXet packaging for windows failed.\n <${currentBuild.absoluteUrl}|${currentBuild.absoluteUrl}>"
+    // }
     always {
       cleanWs()
     }
