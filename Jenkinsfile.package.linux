@@ -91,9 +91,9 @@ pipeline {
           sh """
             mkdir -p ${destinationDir} 
             rm -f ${destinationDir}/PIXet_${VER}_GUI_${pixetVersion}_Linux_x64.deb ${destinationDir}/PIXet_${VER}_GUI_${pixetVersion}_Linux_x64.rpm ${destinationDir}/PIXet_${VER}_GUI_${pixetVersion}_Linux_x64.tar.gz
-            cp _build/pixet.deb ${destinationDir}/PIXet_${VER}_GUI_${pixetVersion}_Linux_x64.deb
-            cp _build/pixet.rpm ${destinationDir}/PIXet_${VER}_GUI_${pixetVersion}_Linux_x64.rpm
-            cp _build/pixet.tar.gz ${destinationDir}/PIXet_${VER}_GUI_${pixetVersion}_Linux_x64.tar.gz
+            cp _build/pixet.deb ${destinationDir}/_TEST_DO_NOT_USE_PIXet_${VER}_GUI_${pixetVersion}_Linux_x64.deb
+            cp _build/pixet.rpm ${destinationDir}/_TEST_DO_NOT_USE_PIXet_${VER}_GUI_${pixetVersion}_Linux_x64.rpm
+            cp _build/pixet.tar.gz ${destinationDir}/_TEST_DO_NOT_USE_PIXet_${VER}_GUI_${pixetVersion}_Linux_x64.tar.gz
             """
           if (params.api) {
             sh """
