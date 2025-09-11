@@ -98,7 +98,7 @@ pipeline {
               del /Q "${destinationDir}\\PIXet_${VER}_API_${pixetVersion}_Windows_x64.zip"
               copy /Y _build\\PixetAPIWin64.zip "${destinationDir}\\PIXet_${VER}_API_${pixetVersion}_Windows_x64.zip"
               rem del /Q "${destinationDir}\\Pixet_${VER}_API_${pixetVersion}_Windows_x86.zip"
-              rem copy /Y _build\\PixetAPIWin32.zip "${destinationDir}\\Pixet_${VER}_API_${pixetVersion}_Windows_x86.zip"
+              rem copy /Y _build\\PixetAPIWin32.zip "${destinationDir}\\_TEST_DO_NOT_USE_Pixet_${VER}_API_${pixetVersion}_Windows_x86.zip"
               """            
           }
         }

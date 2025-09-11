@@ -98,7 +98,7 @@ pipeline {
           if (params.api) {
             sh """
               rm -f ${destinationDir}/PIXet_${VER}_API_${pixetVersion}_Linux_x64.tar.gz
-              cp _build/pixetAPI.tar.gz ${destinationDir}/PIXet_${VER}_API_${pixetVersion}_Linux_x64.tar.gz
+              cp _build/pixetAPI.tar.gz ${destinationDir}/_TEST_DO_NOT_USE_PIXet_${VER}_API_${pixetVersion}_Linux_x64.tar.gz
               """            
           }
         }
