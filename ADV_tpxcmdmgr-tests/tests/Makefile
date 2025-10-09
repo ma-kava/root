@@ -13,9 +13,6 @@ MINIPIX_INCLUDE_DIRS = $(addprefix $(MINIPIX_SRC_DIR)/,$(MINIPIX_INCLUDE_PATHS))
 MINIPIX_CPPFLAGS = $(addprefix -I,$(MINIPIX_INCLUDE_DIRS))
 
 # ---- Googletest configuration ----
-# If you installed via apt + manual build/copy, these are typical:
-#   Headers: /usr/include or /usr/local/include
-#   Libs:    /usr/lib or /usr/local/lib
 GTEST_INC_DIR ?= /usr/local/include
 GTEST_LIB_DIR ?= /usr/local/lib
 
@@ -31,7 +28,7 @@ LDFLAGS += -L$(GTEST_LIB_DIR)
 LDLIBS  += -lgtest -lgmock -lgtest_main -pthread
 
 OBJS = main.o
-TARGET = hwlib
+TARGET = main
 
 .PHONY: build-libs
 
@@ -47,10 +44,11 @@ $(PIXET_HWLIB_OUT_DIR)/$(HWLIBS):
 	export OUTDIR=$(PIXET_OUT_DIR); \
 	$(MAKE) -C $(PIXET_HWLIB_OBJ_DIR)/$(HWLIBS)
 
-# Note: put $(CXXFLAGS) on the link step so -pthread is applied when linking too.
+# One binary that runs all tests
 $(TARGET): $(OBJS) $(PIXET_HWLIB_OUT_DIR)/$(HWLIBS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
 
+# compile_commands.json (so IDEs/language servers get proper flags)
 define COMPILE_COMMAND_TEMPLATE
 {
   "directory": "$(CURDIR)",

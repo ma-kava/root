@@ -1,6 +1,6 @@
 [
 {
-  "directory": "/home/martin/repos/root/tpxcmdmgr-tests/tests",
+  "directory": "/home/martin/repos/root/ADV_tpxcmdmgr-tests/tests",
   "command": "g++ --std=c++20 -g3 -pthread -I/home/martin/repos/Pixet//src/hwlibs/minipix/. -I/home/martin/repos/Pixet//src/hwlibs/minipix/../../interfaces -I/home/martin/repos/Pixet//src/hwlibs/minipix/../../shared -I/home/martin/repos/Pixet//src/hwlibs/minipix/../common -I/home/martin/repos/Pixet//src/hwlibs/minipix/../../interfaces -I/home/martin/repos/Pixet//src/hwlibs/minipix/../../shared/files -I/usr/local/include -c main.cpp -o main.o",
   "file": "main.cpp"
 }

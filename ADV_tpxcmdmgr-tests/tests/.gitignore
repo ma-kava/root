@@ -1,5 +1,5 @@
-integration
-support
-unit
 hwlib
 main.o
+main
+_*
+main.d

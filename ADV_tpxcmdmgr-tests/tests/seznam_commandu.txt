@@ -1,0 +1,107 @@
+data:
+- name: GetParamsLen<ParamsLen DefaultParam>
+    behavior: RespondedBehavior
+- name: ReadCpuFirmwareVersion
+    behavior: RespondedBehavior
+- name: CheckCpuFirmwareKey
+    behavior: RespondedBehavior
+- name: ChipPowerEnable
+    behavior: AckedBehavior
+- name: StartMainFirmware
+    behavior: PostedBehavior
+- name: GetCpuTemperature
+    behavior: RespondedBehavior
+- name: GetCpuStatus
+    behavior: RespondedBehavior
+- name: GetCpuStatusText
+    behavior: RespondedBehavior
+- name: ReadMotorHours
+    behavior: RespondedBehavior
+- name: IsLastRequestFinished
+    behavior: RespondedBehavior
+- name: GetCurrent
+    behavior: RespondedBehavior
+- name: GetPowerSupplyVoltage
+    behavior: RespondedBehavior
+- name: GetADC
+    behavior: RespondedBehavior
+- name: IsExtFlashConnected
+    behavior: RespondedBehavior
+- name: UnlockExtFlash
+    behavior: RespondedBehavior
+- name: ExtFlashStatus
+    behavior: RespondedBehavior
+- name: EraseExtFlashBlock
+    behavior: RespondedBehavior
+- name: ReadFlashParameters
+    behavior: RespondedBehavior
+- name: SetBiasDacVoltage
+    behavior: PostedBehavior
+- name: SetBiasVoltageV3
+    behavior: AckedBehavior
+- name: GetBiasV3
+    behavior: RespondedBehavior
+- name: SetDacNew
+    behavior: AckedBehavior
+- name: GetSupportedCpuCmds
+    behavior: VarLenRespondedBehavior
+- name: GetSupportedCpuCmds::GetLength
+    behavior: RespondedBehavior
+- name: GetSupportedCpuCmds::GetData
+    behavior: RespondedBehavior
+- name: GetDeviceInfo
+    behavior: VarLenRespondedBehavior
+- name: GetDeviceInfo::GetLength
+    behavior: RespondedBehavior
+- name: GetDeviceInfo::GetData
+    behavior: RespondedBehavior
+- name: GetFastParamsTable
+    behavior: VarLenRespondedBehavior
+- name: GetFastParamsTable::GetLength
+    behavior: RespondedBehavior
+- name: GetFastParamsTable::GetData
+    behavior: RespondedBehavior
+- name: GetFastParams
+    behavior: VarLenRespondedBehavior
+- name: GetFastParams::GetLength
+    behavior: RespondedBehavior
+- name: GetFastParams::GetData
+    behavior: RespondedBehavior
+- name: GetHouseKeepingDataTable
+    behavior: VarLenRespondedBehavior
+- name: GetHouseKeepingDataTable::GetLength
+    behavior: RespondedBehavior
+- name: GetHouseKeepingDataTable::GetData
+    behavior: RespondedBehavior
+- name: GetHouseKeepingData
+    behavior: VarLenRespondedBehavior
+- name: GetHouseKeepingData::GetLength
+    behavior: RespondedBehavior
+- name: GetHouseKeepingData::GetData
+    behavior: RespondedBehavior
+
+data:
+- ReadCpuFirmwareVersion
+- GetBiasV3
+- CheckCpuFirmwareKey
+- GetCpuTemperature
+- GetCpuStatus
+- GetCpuStatusText
+- ReadMotorHours
+- IsLastRequestFinished
+- GetParamsLen<Param>
+- GetCurrent
+- GetPowerSupplyVoltage
+- GetADC
+- IsExtFlashConnected
+- UnlockExtFlash
+- ExtFlashStatus
+- EraseExtFlashBlock
+- ReadFlashParameters
+- GetSupportedCpuCmds::GetLength
+- GetSupportedCpuCmds::GetData
+- GetDeviceInfo::GetData
+- GetFastParamsTable::GetData
+- GetFastParams::GetData
+- GetHouseKeepingDataTable::GetData
+- GetHouseKeepingData::GetData

@@ -1,6 +1,6 @@
 # HwMiniPix CPU Command – Test Suite
 
-This project provides **unit tests** and **integration tests** for the `CpuCmds` library.  
+This project provides **unit tests** and **integration tests** for the `hwlibs/minipix/tpx2/cpucommands.h` library.  
 It validates correct **serialization**, **parsing**, **execution logic**, and **error handling** of all CPU commands.
 
 ---
@@ -23,7 +23,7 @@ It validates correct **serialization**, **parsing**, **execution logic**, and **
  └───────────┬─────────────────┘
              │
  ┌───────────▼─────────────────┐
- │ CpuCmds (your file)         │  ← knows how to serialize/parse commands
+ │ cpucommands.h               │  ← knows how to serialize/parse commands
  │   - serialize(cmd)          │
  │   - execute(transport, cmd) │
  └───────────┬─────────────────┘
@@ -43,28 +43,25 @@ It validates correct **serialization**, **parsing**, **execution logic**, and **
 
 ## Types of Tests
 
-### Unit Tests
-- **Serialization tests**  
-  - Each `serialize(cmd)` produces the exact expected byte buffer.
-- **Execution tests with mocks**  
-  - `PostedBehavior` → verifies `send()` called correctly.  
-  - `AckedBehavior` → verifies `exchange()` returns ACK/NACK correctly.  
-  - `RespondedBehavior` → simulates valid & broken responses.  
-  - `VarLen` → simulates multi-step protocol (length + data).  
-- **Resilience tests**  
-  - Broken magic headers.  
-  - Truncated or oversized responses.  
-  - Unterminated strings.  
-  - Random garbage payloads.
+### **How to Test Each Aspect**
 
-### Integration Tests
-- Run only when hardware/simulator available.  
-- Use real `SerialTransport` → `/dev/ttyUSBx` or Windows COM port.  
-- Smoke-test subset of commands:
-  - `ReadCpuFirmwareVersion`  
-  - `GetCpuTemperature`  
-  - `ChipPowerEnable`  
-- Tagged in CTest so they can be skipped in CI:
-```bash
-  ctest -L integration
-```
+#### 1. **Test Serialization (Unit Test, No Mock)**
+- Just call `serialize(cmd)` and check the output matches expected bytes.
+#### 2. **Test Communication (App → MCU, with Mock)**
+- Mock `ICpuTransport::exchange()`.
+- Ensure your `execute()` function serializes correctly and calls `exchange()` with the right send buffer.
+- Optionally, simulate a response buffer in the mock to feed into parsing.
+#### 3. **Test Parsing (Unit Test, No Mock)**
+- Call `parse(cmd, recv_buf)` with a known buffer and check parsed struct/fields.
+#### 4. **Integration-like Test (End-to-End Roundtrip, with Fake)**
+- For true end-to-end, use a **fake** (not a mock) ICpuTransport that mimics MCU behavior:
+    - On `exchange`, it receives command bytes, checks if they're correct, and returns a canned response.
+    - Your test then checks the parsed result.
+### **Summary Table**
+
+| Test          | What it Checks                           | Mock/Real? |
+| ------------- | ---------------------------------------- | ---------- |
+| Serialization | serialize() output                       | None       |
+| Communication | App calls transport with correct buffers | Mock       |
+| Parsing       | parse() works on known buffer            | None       |
+| End-to-end    | Everything together                      | Fake       |
