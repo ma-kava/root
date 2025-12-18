@@ -1,0 +1,16 @@
+# Ignore build and binary folders
+/bin/
+/build/
+/lib/
+/lib64
+/include/
+
+# Ignore unnecessary files
+/*.zip
+/*.json
+
+# Ignore third-party libraries
+/3rdparty/
+
+# python virtual environment
+venv
