@@ -6,21 +6,34 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(BUILD_SHARED_LIBS OFF)
 
-# 3rdparty libs
-add_subdirectory(3rdparty/spdlog)
-add_subdirectory(3rdparty/curl)
+# ======================
+# Dependencies
+# ======================
+
+# libcurl – system dependency
+find_package(CURL REQUIRED)
+
+# libzippp – vendored
 add_subdirectory(3rdparty/libzippp)
 
+# ======================
 # Target
-add_executable(sender src/main.cpp)
+# ======================
 
+add_executable(sender
+    src/main.cpp
+)
+
+# ======================
 # Link
+# ======================
+
 target_link_libraries(sender
-    PRIVATE spdlog
-    PRIVATE libcurl
+    PRIVATE CURL::libcurl
     PRIVATE libzippp
 )
 
+# libzippp headers
 target_include_directories(sender
     PRIVATE 3rdparty/libzippp/src
 )

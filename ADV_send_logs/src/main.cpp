@@ -1,12 +1,10 @@
 #include <filesystem>
 #include <iostream>
-#include <spdlog/spdlog.h>
-#include <spdlog/logger.h>
 #include <curl/curl.h>
 #include <memory>
 #include <cstdlib>
 #include <libzippp.h>
-#include <sys/stat.h> // Pro zjištění velikosti souboru
+#include <sys/stat.h> // for file size
 
 using namespace libzippp;
 namespace fs = std::filesystem;
