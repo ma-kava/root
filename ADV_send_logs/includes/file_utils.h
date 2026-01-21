@@ -13,4 +13,4 @@ struct FileDeleter {
 
 fs::path get_home_path();
 fs::path findFolder(const std::vector<fs::path>& locations, const std::string& folderName);
-bool zipDir(std::string& sourceDir, std::string& outputZip);
+bool zipDir(std::string& sourceDir, std::string& outputZip, bool verbose);

@@ -1,24 +1,20 @@
-#pragma once
+#include "file_utils.h"
 
+// #include <cstdlib>
 #include <filesystem>
 #include <iostream>
-// #include <cstdlib>
 #include <libzippp.h>
 #include <sys/stat.h> // for file size
 
 using namespace libzippp;
 namespace fs = std::filesystem;
 
-// helper for deleting a file
-struct FileDeleter {
-    fs::path p;
-    ~FileDeleter() { 
-        if (fs::exists(p)) {
-            fs::remove(p); 
-            std::cout << "Cleanup: deleted temp file " << p << std::endl;
-        }
+FileDeleter::~FileDeleter() { 
+    if (fs::exists(p)) {
+        fs::remove(p); 
+        // std::cout << "Cleanup: deleted temp file " << p << std::endl;
     }
-};
+}
 
 fs::path get_home_path() {
 #ifdef _WIN32
@@ -40,7 +36,7 @@ fs::path findFolder(const std::vector<fs::path>& locations, const std::string& f
     return "";
 }
 
-bool zipDir(std::string& sourceDir, std::string& outputZip) {
+bool zipDir(std::string& sourceDir, std::string& outputZip, bool verbose) {
     // create and open zip 
     ZipArchive zf(outputZip);
     if (!zf.open(ZipArchive::New)) {
@@ -54,7 +50,8 @@ bool zipDir(std::string& sourceDir, std::string& outputZip) {
     }
     
     for (const auto& entry : fs::recursive_directory_iterator(sourceDir)) {
-        std::cout << entry.path().string() << '\n';
+        if (verbose)
+            std::cout << entry.path().string() << '\n';
         
         if (entry.is_regular_file()) {
             std::string filePath = entry.path().string();
@@ -67,9 +64,9 @@ bool zipDir(std::string& sourceDir, std::string& outputZip) {
             std::replace(nameInZip.begin(), nameInZip.end(), '\\', '/');
 #endif
 
-            if (!zf.addFile(nameInZip, filePath)) {
+            if (!zf.addFile(nameInZip, filePath) && verbose) {
                 std::cerr << "Warning: Failed to add " << nameInZip << std::endl;
-            } else {
+            } else if (verbose) {
                 std::cout << "Added: " << nameInZip << std::endl;
             }
         }

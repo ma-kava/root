@@ -5,6 +5,7 @@
 #include <sys/stat.h> // for file size
 #include <vector>
 #include "file_utils.h"
+#include "LogUploader.h"
 
 // using namespace libzippp;
 namespace fs = std::filesystem;
@@ -23,13 +24,13 @@ int main() {
     if (result.empty())
         return false;
     fs::path folder(result);
-    std::cout << "traversing: " << folder << '\n';
-
-
+    
+    
     // ------ creating archive ------
+    std::cout << "zipping: " << folder << '\n';
     std::string sourceDir = folder.string();
     std::string outputZip = "diagnostics_upload.zip";
-    zipDir(sourceDir, outputZip);
+    zipDir(sourceDir, outputZip, false);
 
 
     // ------ libcurl stuff ------
@@ -38,9 +39,19 @@ int main() {
     // FILE * fd;
     // struct stat file_info;
 
-    // { // new scope for FileDeleter
+    { // new scope for FileDeleter
 
-    //     FileDeleter cleaner{outputZip};
+        FileDeleter cleaner{outputZip};
+
+        LogUploader uploader{"127.0.0.1", 5000, "/log"};
+
+        uploader.sendMessage("Hello server", [](bool success, const std::string& msg) {
+            if (success) {
+                std::cout << "Upload OK: " << msg << std::endl;
+            } else {
+                std::cerr << "Upload FAILED: " << msg << std::endl;
+            }
+        });
         
     //     if (stat(outputZip.c_str(), &file_info) != 0) {
     //         std::cerr << "Error: file size cannot be found" << std::endl;
@@ -93,7 +104,7 @@ int main() {
     //     fclose(fd);
     //     curl_global_cleanup();
 
-    // } // <- archive deleted
+    } // <- archive deleted
 
     // return (res == CURLE_OK);
 

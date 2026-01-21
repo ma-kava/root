@@ -3,9 +3,13 @@
 #include "httplib.h"
 
 #include <string>
+#include <cstdint>
 #include <functional>
 
-LogUploader::LogUploader(const std::string& serverUrl) {
+LogUploader::LogUploader(const std::string& serverUrl, uint16_t port, const std::string& path) {
+    serverUrl_ = serverUrl;
+    port_ = port;
+    path_ = path;
 }
 
 void LogUploader::upload(const std::string& filePath, Callback cb) {
@@ -17,3 +21,21 @@ void LogUploader::upload(const std::string& filePath, Callback cb) {
     // 5. Zavolat callback
 }
 
+void LogUploader::sendMessage(const std::string& message, Callback cb) {
+    // HTTP
+    httplib::Client cli(serverUrl_, port_);
+
+    auto res = cli.Post(path_, message, "text/plain");
+
+    if (res) {
+        if (res->status >= 200 && res->status < 300) {
+            cb(true, res->body);
+        } else {
+            cb(false, "HTTP error: " + std::to_string(res->status));
+        }
+    } else {
+        cb(false, "Request failed: " + std::to_string(static_cast<int>(res.error())));
+    }
+
+    return;
+}
