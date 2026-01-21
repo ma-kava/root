@@ -5,16 +5,17 @@ app = Flask(__name__)
 @app.route('/log', methods=['POST', 'PUT'])
 def receive_log():
     print("=== Received ===")
-    # request.data jsou surové bajty (bytes)
     data = request.data
     print(f"Received {len(data)} bytes.")
-    
-    # Uložení binárních dat do souboru
+
     with open('received_archive.zip', 'wb') as f:
         f.write(data)
-        
+
     return {"status": "ok"}
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000)
-    
+    app.run(
+        host='127.0.0.1',
+        port=5000,
+        ssl_context=('server.crt', 'server.key')
+    )
