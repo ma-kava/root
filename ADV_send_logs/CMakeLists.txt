@@ -54,7 +54,7 @@ add_executable(main ${SOURCE_FILES})
 # ---------------------------------------------------------
 
 target_include_directories(main PRIVATE
-    includes                     # (LogUploader.h, httplib.h)
+    includes                     # (LogUploader.h, httplib.h,...)
     ${OPENSSL_INCLUDE_DIR}       # OpenSSL headers
     3rdparty/libzippp/src        # libzippp headers
 )
@@ -63,11 +63,11 @@ target_include_directories(main PRIVATE
 # 6. Linking a Definition
 # ---------------------------------------------------------
 
-# Turn on SSL for httplib (important define before including)
+# Turn on SSL for httplib (important to define before including httplib)
 target_compile_definitions(main PRIVATE CPPHTTPLIB_OPENSSL_SUPPORT)
 
 target_link_libraries(main PRIVATE
-    OpenSSL::SSL
+    OpenSSL::SSL        # httplib needs these to support SSL
     OpenSSL::Crypto
     
     libzippp
