@@ -85,3 +85,81 @@ cmake --build build
 - Vendored libraries are located in `third_party/`.
 - `CMakeLists.txt` should be updated if library versions change.
 - For production use, replace self-signed certificates with a proper CA-signed certificate.
+
+## Architecture (SDD)
+
+```bash
+src/
+├── main.cpp
+
+├── fsm/
+│   ├── fsm.h
+│   ├── fsm.cpp
+│   └── context.h
+
+├── steps/
+│   ├── locate_logs.h
+│   ├── locate_logs.cpp
+│   ├── zip_logs.h
+│   ├── zip_logs.cpp
+│   ├── upload_logs.h
+│   ├── upload_logs.cpp
+│   ├── cleanup.h
+│   └── cleanup.cpp
+
+├── infra/
+│   ├── file_utils.h
+│   ├── file_utils.cpp
+│   ├── log_uploader.h
+│   └── log_uploader.cpp
+
+```
+
+## Errors 
+
+### 1. `SSLConnection`
+
+> TLS handshake nelze vůbec navázat
+
+**Typicky**:
+- server běží pouze na HTTP, klient je SSLClient
+- server zavře socket během handshaku
+- nekompatibilní TLS verze / cipher suite
+- server není na daném portu
+
+### 2. `SSLServerHostnameVerification`
+
+> Selhání overeni identity serveru (problem duvery)
+
+Hostname v URL (localhost) neodpovídá žádnému SAN v certifikátu. (CN se dnes bere jen jako fallback, SAN je rozhodující)
+
+### 3. `SSLLoadingCerts`
+
+> Klient nedokázal načíst nebo použít své vlastní trust materiály
+
+Týká se výhradně lokální konfigurace klienta.
+
+**Typicky**:
+- CA soubor neexistuje
+- CA soubor má špatný formát
+- CA není čitelná (práva)
+- prázdný nebo poškozený cert bundle
+
+### 4. SSLServerVerification
+
+> certifikát je kryptograficky OK, hostname sedí, ale cert chain nekončí v důvěryhodné CA
+
+**Typicky**:
+- self-signed cert bez odpovídající CA
+- chybějící intermediate CA
+- cert podepsaný jinou CA, než klient zná
+
+---
+
+| Error                           | Vrstva        | Přesný význam                        |
+| ------------------------------- | ------------- | ------------------------------------ |
+| `SSLConnection`                 | Transport/TLS | TLS handshake nelze navázat          |
+| `SSLServerHostnameVerification` | Identity      | Certifikát nepatří cílovému hostname |
+| `SSLLoadingCerts`               | Client config | Klient nemá použitelnou CA           |
+| `SSLServerVerification`         | Trust         | Certifikátu nelze důvěřovat          |
+

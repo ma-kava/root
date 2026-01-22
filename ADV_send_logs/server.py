@@ -1,4 +1,5 @@
 from flask import Flask, request
+import os
 
 app = Flask(__name__)
 
@@ -11,11 +12,13 @@ def receive_log():
     with open('received_archive.zip', 'wb') as f:
         f.write(data)
 
+    # os._exit(1) # to test Error::Read
+    # return {"Bad request": 400}
     return {"status": "ok"}
 
 if __name__ == '__main__':
     app.run(
-        host='127.0.0.1',
+        host='localhost',
         port=5000,
         ssl_context=('server.crt', 'server.key')
     )

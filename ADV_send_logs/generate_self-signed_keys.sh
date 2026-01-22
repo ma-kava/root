@@ -1,3 +1,7 @@
 ##!/bin/sh
 
-openssl req -x509 -newkey rsa:4096 -keyout server.key -out server.crt -days 365 -nodes
+openssl req -x509 -nodes -days 365 \
+-newkey rsa:4096 \
+-keyout server.key \
+-out server.crt \
+-config openssl.cnf

@@ -16,6 +16,26 @@ FileDeleter::~FileDeleter() {
     }
 }
 
+/*
+Result<fs::path, FsError> get_home_path() {
+#ifdef _WIN32
+    if (const char* p = std::getenv("USERPROFILE")) {
+        return { fs::path(p), std::nullopt };
+    }
+    return { std::nullopt, FsError::HomeNotSet };
+#else
+    if (const char* p = std::getenv("HOME")) {
+        fs::path home(p);
+        if (fs::exists(home)) {
+            return { home, std::nullopt };
+        }
+        return { std::nullopt, FsError::PathNotFound };
+    }
+    return { std::nullopt, FsError::HomeNotSet };
+#endif
+}
+*/
+
 fs::path get_home_path() {
 #ifdef _WIN32
     std::string user_profile = std::getenv("USERPROFILE");
@@ -44,11 +64,6 @@ bool zipDir(std::string& sourceDir, std::string& outputZip, bool verbose) {
         return false;
     }
 
-    if (!fs::exists(sourceDir) || !fs::is_directory(sourceDir)) {
-        std::cerr << "Error: Source Dir doesn't exist" << std::endl;
-        return false;
-    }
-    
     for (const auto& entry : fs::recursive_directory_iterator(sourceDir)) {
         if (verbose)
             std::cout << entry.path().string() << '\n';
