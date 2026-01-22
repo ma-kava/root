@@ -10,7 +10,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ---------------------------------------------------------
 set(SOURCE_FILES
     src/main.cpp
-    src/LogUploader.cpp
+    src/steps/cleanup.cpp
+    src/steps/locate_logs.cpp
+    src/steps/upload_logs.cpp
+    src/steps/zip_logs.cpp
     src/file_utils.cpp
 )
 
@@ -19,7 +22,8 @@ set(SOURCE_FILES
 # ---------------------------------------------------------
 set(MY_OPENSSL_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/openssl3.0")
 
-set(OPENSSL_INCLUDE_DIR "${MY_OPENSSL_ROOT}/include")
+set(OPENSSL_ROOT_DIR "${MY_OPENSSL_ROOT}" CACHE PATH "OpenSSL root dir")
+set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "Use static OpenSSL")
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(OPENSSL_LIB_DIR "${MY_OPENSSL_ROOT}/linux/lib")
@@ -27,10 +31,21 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(OPENSSL_LIB_DIR "${MY_OPENSSL_ROOT}/macos/lib")
 endif()
 
-# force using our static libraries
-set(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_LIB_DIR}/libcrypto.a")
-set(OPENSSL_SSL_LIBRARY "${OPENSSL_LIB_DIR}/libssl.a")
-set(OPENSSL_USE_STATIC_LIBS ON)
+# setting the cache is important for `find_package(OpenSSL)` in libzippp
+set(OPENSSL_INCLUDE_DIR
+    "${MY_OPENSSL_ROOT}/include"
+    CACHE PATH "OpenSSL include dir"
+)
+
+set(OPENSSL_SSL_LIBRARY
+    "${OPENSSL_LIB_DIR}/libssl.a"
+    CACHE FILEPATH "OpenSSL SSL library"
+)
+
+set(OPENSSL_CRYPTO_LIBRARY
+    "${OPENSSL_LIB_DIR}/libcrypto.a"
+    CACHE FILEPATH "OpenSSL Crypto library"
+)
 
 find_package(OpenSSL REQUIRED)
 
@@ -55,6 +70,7 @@ add_executable(main ${SOURCE_FILES})
 
 target_include_directories(main PRIVATE
     includes                     # (LogUploader.h, httplib.h,...)
+    includes/steps
     ${OPENSSL_INCLUDE_DIR}       # OpenSSL headers
     3rdparty/libzippp/src        # libzippp headers
 )
