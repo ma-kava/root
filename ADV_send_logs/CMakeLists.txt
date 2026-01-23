@@ -1,20 +1,30 @@
 cmake_minimum_required(VERSION 3.12)
 project(LogUploaderStandalone CXX)
 
-# Nastavení C++ standardu
+# ---------------------------------------------------------
+# 0. Language standard
+# ---------------------------------------------------------
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ---------------------------------------------------------
-# 1. Source files definition
+# 1. Source files (module-oriented)
 # ---------------------------------------------------------
 set(SOURCE_FILES
-    src/main.cpp
+    src/app/main.cpp
+
+    src/fsm/fsm.cpp
+
+    src/steps/environment.cpp
+    src/steps/packaging.cpp
+    src/steps/transport.cpp
     src/steps/cleanup.cpp
-    src/steps/locate_logs.cpp
-    src/steps/upload_logs.cpp
-    src/steps/zip_logs.cpp
-    src/file_utils.cpp
+    src/steps/network_setup.cpp
+
+    src/policy/retry_policy.cpp
+
+    src/infra/file_utils.cpp
+    src/infra/log_uploader.cpp
 )
 
 # ---------------------------------------------------------
@@ -55,34 +65,34 @@ message(STATUS "OpenSSL Libs: ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY}")
 # ---------------------------------------------------------
 # 3. Libzippp
 # ---------------------------------------------------------
-
 add_subdirectory(3rdparty/libzippp)
 
 # ---------------------------------------------------------
-# 4. Target
+# 4. Executable target
 # ---------------------------------------------------------
-
-add_executable(main ${SOURCE_FILES})
+add_executable(log_uploader ${SOURCE_FILES})
 
 # ---------------------------------------------------------
-# 5. Includes
+# 5. Include directories
 # ---------------------------------------------------------
-
-target_include_directories(main PRIVATE
-    includes                     # (LogUploader.h, httplib.h,...)
-    includes/steps
-    ${OPENSSL_INCLUDE_DIR}       # OpenSSL headers
-    3rdparty/libzippp/src        # libzippp headers
+target_include_directories(log_uploader PRIVATE
+    src
+    3rdparty/httplib
+    ${OPENSSL_INCLUDE_DIR}
+    3rdparty/libzippp/src
 )
 
 # ---------------------------------------------------------
-# 6. Linking a Definition
+# 6. Compile definitions
 # ---------------------------------------------------------
+target_compile_definitions(log_uploader PRIVATE
+    CPPHTTPLIB_OPENSSL_SUPPORT
+)
 
-# Turn on SSL for httplib (important to define before including httplib)
-target_compile_definitions(main PRIVATE CPPHTTPLIB_OPENSSL_SUPPORT)
-
-target_link_libraries(main PRIVATE
+# ---------------------------------------------------------
+# 7. Link libraries
+# ---------------------------------------------------------
+target_link_libraries(log_uploader PRIVATE
     OpenSSL::SSL        # httplib needs these to support SSL
     OpenSSL::Crypto
     
@@ -90,8 +100,7 @@ target_link_libraries(main PRIVATE
 )
 
 if(WIN32)
-    target_link_libraries(main PRIVATE ws2_32 crypt32)
+    target_link_libraries(log_uploader PRIVATE ws2_32 crypt32)
 elseif(UNIX AND NOT APPLE)
-    # Na Linuxu statické OpenSSL často potřebuje vlákna a dl
-    target_link_libraries(main PRIVATE pthread dl)
+    target_link_libraries(log_uploader PRIVATE pthread dl)
 endif()

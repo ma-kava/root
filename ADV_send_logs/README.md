@@ -90,7 +90,8 @@ cmake --build build
 
 ```bash
 src/
-├── main.cpp
+├── app/
+│   └── main.cpp
 
 ├── fsm/
 │   ├── fsm.h
@@ -98,22 +99,33 @@ src/
 │   └── context.h
 
 ├── steps/
-│   ├── locate_logs.h
-│   ├── locate_logs.cpp
-│   ├── zip_logs.h
-│   ├── zip_logs.cpp
-│   ├── upload_logs.h
-│   ├── upload_logs.cpp
-│   ├── cleanup.h
+│   ├── environment.cpp
+│   ├── environment.h
+│   ├── packaging.cpp
+│   ├── packaging.h
+│   ├── transport.cpp
+│   ├── transport.h
 │   └── cleanup.cpp
 
+├── policy/
+│   ├── retry_policy.cpp
+│   └── retry_policy.h
+
 ├── infra/
-│   ├── file_utils.h
 │   ├── file_utils.cpp
-│   ├── log_uploader.h
-│   └── log_uploader.cpp
+│   ├── file_utils.h
+│   ├── log_uploader.cpp
+│   └── log_uploader.h
 
 ```
+
+| Skupina       | Stavy                                |
+| ------------- | ------------------------------------ |
+| Environment   | `FindHome`, `LocateLogs`, `ReadPath` |
+| Packaging     | `ZipLogs`                            |
+| Network setup | `Preflight`                          |
+| Transport     | `Transport`, `ServerResponse`        |
+| Policy        | `RetryPolicy`                        |
 
 ## Errors 
 

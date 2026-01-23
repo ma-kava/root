@@ -4,8 +4,8 @@
 // #include <libzippp.h>
 #include <sys/stat.h> // for file size
 #include <vector>
-#include "file_utils.h"
-#include "steps/upload_logs.h"
+#include "infra/file_utils.h"
+#include "infra/log_uploader.h"
 
 // using namespace libzippp;
 namespace fs = std::filesystem;

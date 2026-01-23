@@ -1,4 +1,4 @@
-#include "steps/upload_logs.h"
+#include "infra/log_uploader.h"
 
 #include "httplib.h"
 
