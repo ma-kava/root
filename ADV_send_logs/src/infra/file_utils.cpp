@@ -1,7 +1,7 @@
 #include "file_utils.h"
 
-// #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <libzippp.h>
 #include <sys/stat.h> // for file size
@@ -9,40 +9,25 @@
 using namespace libzippp;
 namespace fs = std::filesystem;
 
-FileDeleter::~FileDeleter() { 
-    if (fs::exists(p)) {
-        fs::remove(p); 
-        // std::cout << "Cleanup: deleted temp file " << p << std::endl;
+FileDeleter::~FileDeleter() {
+    if (!p.empty() && fs::exists(p)) {
+        fs::remove(p);
     }
 }
 
-/*
-Result<fs::path, FsError> get_home_path() {
-#ifdef _WIN32
-    if (const char* p = std::getenv("USERPROFILE")) {
-        return { fs::path(p), std::nullopt };
-    }
-    return { std::nullopt, FsError::HomeNotSet };
-#else
-    if (const char* p = std::getenv("HOME")) {
-        fs::path home(p);
-        if (fs::exists(home)) {
-            return { home, std::nullopt };
-        }
-        return { std::nullopt, FsError::PathNotFound };
-    }
-    return { std::nullopt, FsError::HomeNotSet };
-#endif
+bool is_zip_ready(const fs::path& dir) {
+    if (!fs::exists(dir) || !fs::is_directory(dir))
+        return false;
+    return true;
 }
-*/
 
 fs::path get_home_path() {
 #ifdef _WIN32
     std::string user_profile = std::getenv("USERPROFILE");
-    return user_profile ? fs::path(user_profile) : fs::path("C:\\");
+    return user_profile ? fs::path(user_profile) : fs::path("");
 #else
     std::string home = std::getenv("HOME");
-    return fs::exists(home) ? fs::path(home) : fs::path("/tmp");
+    return fs::exists(home) ? fs::path(home) : fs::path("");
 #endif
 }
 
@@ -56,7 +41,7 @@ fs::path findFolder(const std::vector<fs::path>& locations, const std::string& f
     return "";
 }
 
-bool zipDir(std::string& sourceDir, std::string& outputZip, bool verbose) {
+bool zipDir(fs::path& sourceDir, fs::path& outputZip, bool verbose) {
     // create and open zip 
     ZipArchive zf(outputZip);
     if (!zf.open(ZipArchive::New)) {

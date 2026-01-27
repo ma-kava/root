@@ -13,49 +13,47 @@ State transition(State s, Event e) {
 
         case State::LocateLogs:
             if (e == Event::LogsPathSet) return State::ReadPath;
+            if (e == Event::LogsPathNotSet) return State::Error;
             break;
 
         case State::ReadPath:
-            if (e == Event::LogsFound) return State::ZipLogs;
+            if (e == Event::LogsOK) return State::ZipLogs;
             if (e == Event::NoReadRights) return State::Error;
-            if (e == Event::LogsNotFound) return State::Error; // logsPath = ""
+            if (e == Event::LogsNotFound) return State::Error; // logsPath = "" TODO: this event is probably redundant 
             break;
 
         case State::ZipLogs:
-            if (e == Event::ZipOk) return State::Preflight;
+            if (e == Event::ZipOk) return State::UploadToServer;
             if (e == Event::ZipFailed) return State::Error;
             if (e == Event::ZipCantCreate) return State::Error;
             break;
 
-        case State::Preflight:
-            if (e == Event::Connected) return State::Transport;
+        case State::UploadToServer:
+            // Preflight
+            if (e == Event::Connected) return State::UploadToServer;
             if (e == Event::ErrSSLConnection) return State::Error;
             if (e == Event::ErrSSLHostnameVerif) return State::Error;
             if (e == Event::ErrSSLLoadCerts) return State::Error;
             if (e == Event::ErrSSLServerVerif) return State::Error;
-            break;
-
-        case State::Transport:
-            if (e == Event::UploadOk) return State::ServerResponse;
+            
+            // Transport
             if (e == Event::ErrConnection) return State::RetryPolicy;
             if (e == Event::ErrConnectionTimeout) return State::RetryPolicy;
             if (e == Event::ErrRead) return State::RetryPolicy;
             if (e == Event::ErrWrite) return State::RetryPolicy;
-            break;
-        
-        case State::RetryPolicy:
-            return State::Error;
-            break;
             
-        case State::ServerResponse:
+            // ServerResponse
             if (e == Event::HTTP_OK) return State::Done;
             if (e == Event::ErrClient) return State::Error;
             if (e == Event::ErrServer) return State::RetryPolicy;
             break;
+        
+        case State::RetryPolicy:
+            if (e == Event::Reconnect) return State::UploadToServer;
+            break;
 
         default:
             break;
-
         }
         
     return State::Error;

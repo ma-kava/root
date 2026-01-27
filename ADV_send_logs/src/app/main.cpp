@@ -1,57 +1,66 @@
 #include <filesystem>
 #include <iostream>
-// #include <curl/curl.h>
-// #include <libzippp.h>
-#include <sys/stat.h> // for file size
-#include <vector>
-#include "infra/file_utils.h"
-#include "infra/log_uploader.h"
+// #include <sys/stat.h> // for file size
 
-// using namespace libzippp;
+#include "fsm/fsm.h"
+#include "fsm/context.h"
+
+#include "steps/environment.h"
+#include "steps/network_setup.h"
+#include "steps/packaging.h"
+#include "policy/retry_policy.h"
+
+#define DEBUG
+
+#ifdef DEBUG
+#include "debug/log.hpp"
+#endif
+
 namespace fs = std::filesystem;
 
 
 int main() {
-    // ------ seraching for logs file ------
-    std::string home = get_home_path();
-    
-    std::vector<fs::path> searchPaths = {
-        fs::path(home),
-        fs::path(home) / ".config"
-    };
+    fs::path outputZip = "logs_dir.zip";
+    Context ctx = Context("127.0.0.1", 5000, "/log"/* init LogUploader */, outputZip, 1);
+    State state = State::Idle;
+    Event ev = Event::Start;
 
-    fs::path result = findFolder(searchPaths, "PixetPro/logs");
-    // read files
-    if (result.empty())
-        return false;
-        
-    fs::path folder(result);
-    
-    
-    // ------ creating archive ------
-    std::cout << "zipping: " << folder << '\n';
-    std::string sourceDir = folder.string();
-    std::string outputZip = "diagnostics_upload.zip";
-    zipDir(sourceDir, outputZip, false);
+    while (state != State::Done && state != State::Error) {
+        State next = transition(state, ev);
+        log_fsm(state, ev, next);
+        state = next;
 
+        switch (state)
+        {
+        case State::FindHome:
+            ev = handleFindHome(ctx);
+            break;
 
-    // ------ communication with the server ------
+        case State::LocateLogs:
+            ev = handleLocateLogs(ctx);
+            break;
 
-    { // new scope for FileDeleter
+        case State::ReadPath:
+            ev = handleReadPath(ctx);
+            break;
 
-        FileDeleter cleaner{outputZip};
+        case State::ZipLogs:
+            ev = handleZipLogs(ctx);
+            break;
 
-        LogUploader uploader{"127.0.0.1", 5000, "/log"};
+        case State::UploadToServer:
+            ev = handleUploadToServer(ctx);
+            break;
 
-        uploader.sendMessage("Hello server", [](bool success, const std::string& msg) {
-            if (success) {
-                std::cout << "Upload OK: " << msg << std::endl;
-            } else {
-                std::cerr << "Upload FAILED: " << msg << std::endl;
-            }
-        });
+        case State::RetryPolicy:
+            ev = handleRetryPolicy(ctx);
+            break;
 
-    } // <- archive deleted
+        default:
+            std::cout << "main: DEFAULT\n";
+            break;
+        }
+    }
 
     return 0;
 }

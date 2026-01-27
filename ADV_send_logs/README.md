@@ -175,3 +175,67 @@ Týká se výhradně lokální konfigurace klienta.
 | `SSLLoadingCerts`               | Client config | Klient nemá použitelnou CA           |
 | `SSLServerVerification`         | Trust         | Certifikátu nelze důvěřovat          |
 
+## FMS UML diagram
+
+```plantuml
+@startuml
+
+skinparam shadowing false
+skinparam StateBackgroundColor #62bdf1ff
+skinparam StateBorderColor #2700d3ff
+skinparam StateFontName Helvetica
+
+state Error #dd1212ff: <color:white>Chyba</color>
+state Done #12dd12ff: <color:white>Hotovo</color>
+
+' Cluster 1
+state "Prepare Logs" as Preparation {
+   state FindHome
+   state LocateLogs
+   state ReadPath
+   state ZipLogs
+   
+   FindHome --> LocateLogs : HomeSet
+   LocateLogs --> ReadPath : LogsPathSet
+   ReadPath --> ZipLogs : LogsOk
+}
+
+' Cluster 2
+state "Upload to Server" as Networking {
+   state Preflight
+   state Transport
+   state ServerResponse
+   state RetryPolicy
+   
+   Preflight --> Transport : Connected
+   Transport --> ServerResponse : UploadOK
+   
+   ' Force directions
+   Transport -down-> RetryPolicy : ErrConnection\nErrTimeout\nErrRead\nErrWrite
+   ServerResponse -down-> RetryPolicy : ErrServer
+   
+   RetryPolicy -up-> Preflight : Reconnect
+}
+
+[*] --> Idle
+Idle --> FindHome : Start
+
+' Connect clusters
+ZipLogs --> Preflight : ZipOK
+
+' Success
+ServerResponse --> Done : HTTP_OK
+
+' Error states
+' Používáme || pro sloučení šipek (PlantUML vylepšení)
+FindHome --> U : HomeNotSet
+LocateLogs --> U : LogsPathNotSet
+ReadPath --> U : NoReadingRights
+ZipLogs --> U : ZipFailed / CantCreate
+Preflight --> U : SSL / TLS Errors
+ServerResponse --> U : ErrClient
+
+U --> Error
+
+@enduml
+```

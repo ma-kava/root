@@ -14,17 +14,18 @@ set(SOURCE_FILES
     src/app/main.cpp
 
     src/fsm/fsm.cpp
+    src/fsm/context.cpp
 
     src/steps/environment.cpp
-    src/steps/packaging.cpp
-    src/steps/transport.cpp
-    src/steps/cleanup.cpp
     src/steps/network_setup.cpp
+    src/steps/packaging.cpp
 
     src/policy/retry_policy.cpp
 
     src/infra/file_utils.cpp
     src/infra/log_uploader.cpp
+
+    src/debug/log.hpp
 )
 
 # ---------------------------------------------------------

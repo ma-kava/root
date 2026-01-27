@@ -3,17 +3,19 @@
 #include <string>
 #include <cstdint>
 #include <functional>
+#include <httplib.h>
+
+using Callback = std::function<void(bool success, const std::string& msg)>;
 
 class LogUploader {
 public:
-    using Callback = std::function<void(bool success, const std::string& msg)>;
 
-    LogUploader(const std::string& serverUrl, uint16_t port, const std::string& path);
-    void upload(const std::string& filePath, Callback cb = nullptr);
-    void sendMessage(const std::string& message, Callback cb = nullptr);
+    LogUploader(const std::string& serverUrl, uint16_t port, const std::string& path, uint8_t timeout);
+    httplib::Result sendMessage(const std::string& message, Callback cb = nullptr);
 
 private:
     std::string serverUrl_;
     uint16_t port_;
     std::string path_;
+    u_int8_t timeout_;
 };
