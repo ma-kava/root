@@ -16,7 +16,7 @@ The process consists of two main parts:
 To build and run this project, the following are required:
 
 - **libzippp** – for creating zip archives
-- **httplib.h** – header-only HTTP client library
+- **httplib.h** – header-only cross platform HTTP/HTTPS library
 - **OpenSSL 3.0** – for HTTPS support
 
 All libraries are vendored to ensure smooth cross-platform compatibility. On Windows, OpenSSL 3.0 is usually already installed, but for Linux/macOS, make sure paths are correctly set in `CMakeLists.txt`.
@@ -35,9 +35,9 @@ The communication is secured via **HTTPS**, meaning the client verifies the serv
 ```
 
 - **Logs location**: By default, the client searches for the `~/.config/PixetPro/logs` folder. This can be modified in the code if needed.
-- **Environment variables (optional)**:
+<!-- - **Environment variables (optional)**: TODO for tests
   - `PIXET_LOGS_PATH` – override default logs folder path.
-  - `PIXET_SERVER_URL` – override default server URL (`https://localhost:5000`).
+  - `PIXET_SERVER_URL` – override default server URL (`https://localhost:5000`). -->
 
 ---
 
@@ -82,52 +82,113 @@ cmake --build build
 
 ## Notes for further Development
 
-- Vendored libraries are located in `third_party/`.
-- `CMakeLists.txt` should be updated if library versions change.
+- Vendored libraries are located in `3rdparty/`.
 - For production use, replace self-signed certificates with a proper CA-signed certificate.
 
 ## Architecture (SDD)
 
-```bash
-src/
-├── app/
-│   └── main.cpp
+Cela aplikace je rizena deterministickym stavovym automatem (FSM). To znamena nekolik veci:
 
-├── fsm/
-│   ├── fsm.h
-│   ├── fsm.cpp
-│   └── context.h
+- cela aplikace je v jeden okamzik pouze v jednom stavu (`State`)
+- Každý `State`:
+  - provede jednu konkrétní operaci
+  - vrátí `Event`
+  - nesmí řídit přechody přímo
 
-├── steps/
-│   ├── environment.cpp
-│   ├── environment.h
-│   ├── packaging.cpp
-│   ├── packaging.h
-│   ├── transport.cpp
-│   ├── transport.h
-│   └── cleanup.cpp
+- `State` nesmí:
+  - znát další stav
+  - dělat retry sám
+  - rozhodovat o chybové politice
 
-├── policy/
-│   ├── retry_policy.cpp
-│   └── retry_policy.h
+### FSM definition and implementation
 
-├── infra/
-│   ├── file_utils.cpp
-│   ├── file_utils.h
-│   ├── log_uploader.cpp
-│   └── log_uploader.h
+FSM je definovan v `fsm.h`. Cely chod FSM probiha zpusobobem `State -> Event -> FSM -> Next State`.
 
+```plantuml
+@startuml
+
+skinparam shadowing false
+skinparam StateBackgroundColor #62bdf1ff
+skinparam StateBorderColor #11083dff
+
+state Error #dd1212ff:
+state Done #12dd12ff:
+
+' Cluster 1
+state "Prepare Logs" as Preparation {
+   state FindHome
+   state LocateLogs
+   state ReadPath
+   state ZipLogs
+   
+   FindHome --> LocateLogs : HomeSet
+   LocateLogs --> ReadPath : LogsPathSet
+   ReadPath --> ZipLogs : LogsOk
+}
+
+' Cluster 2
+state "Upload to Server" as Networking {
+   state Preflight
+   state Transport
+   state ServerResponse 
+   state RetryPolicy : decides retry / abort
+   
+   Preflight --> Transport : Connected
+   Transport --> ServerResponse : UploadOK
+   
+   ' Force directions
+   Transport -down-> RetryPolicy : ErrConnection\nErrTimeout\nErrRead\nErrWrite
+   ServerResponse -down-> RetryPolicy : ErrServer
+   
+   RetryPolicy -up-> Preflight : Reconnect
+}
+
+[*] --> Idle
+Idle --> FindHome : Start
+
+' Connect clusters
+ZipLogs --> Preflight : ZipOK
+
+' Success
+ServerResponse --> Done : HTTP_OK
+
+' Error states
+FindHome --> U : HomeNotSet
+LocateLogs --> U : LogsPathNotSet
+ReadPath --> U : NoReadingRights
+ZipLogs --> U : ZipFailed / CantCreate
+Preflight --> U : SSL / TLS Errors
+ServerResponse --> U : ErrClient
+RetryPolicy --> Error : Abort
+
+U --> Error
+
+@enduml
 ```
 
-| Skupina       | Stavy                                |
-| ------------- | ------------------------------------ |
-| Environment   | `FindHome`, `LocateLogs`, `ReadPath` |
-| Packaging     | `ZipLogs`                            |
-| Network setup | `Preflight`                          |
-| Transport     | `Transport`, `ServerResponse`        |
-| Policy        | `RetryPolicy`                        |
+### Implementation
 
-## Errors 
+| FSM State                        | Implementace           | Side-effects       | Výstupní Eventy                       |
+| -------------------------------- | ---------------------- | ------------------ | ------------------------------------- |
+| `FindHome`                       | `handleFindHome()`     | FS, env vars       | `HomeSet`, `HomeNotSet`               |
+| `LocateLogs`                     | `handleFindHome`       | FS                 | `LogsPathSet`, `LogsPathNotSet`       |
+| `ReadPath`                       | `handleReadPath`       | FS (permissions)   | `LogsOk`, `NoReadingRights`           |
+| `ZipLogs`                        | `handleZipLogs`        | FS, compression    | `ZipOK`, `ZipFailed`, `ZipCantCreate` |
+| `UploadToServer[Preflight]`      | `handlePreflight`      | DNS, TLS handshake | `Connected`, `ErrSSL*`                |
+| `UploadToServer[Transport]`      | `handleTransport`      | Socket I/O         | `ErrConnection`, `Err*`               |
+| `UploadToServer[ServerResponse]` | `handleServerResponse` | HTTP parsing       | `HTTP_OK`, `ErrClient`, `ErrServer`   |
+| `RetryPolicy`                    | `handleRetryPolicy`    | sleep / counters   | `Reconnect`, `Abort`                  |
+
+### Why UploadToServer is a single FSM state
+
+Although the upload process is logically divided into Preflight, Transport
+and ServerResponse phases, it is implemented as a single FSM state.
+
+**Reason**
+- `httplib` performs TLS handshake, request send and response receive
+  synchronously within a single call stack
+
+## SSL Errors 
 
 ### 1. `SSLConnection`
 
@@ -175,67 +236,3 @@ Týká se výhradně lokální konfigurace klienta.
 | `SSLLoadingCerts`               | Client config | Klient nemá použitelnou CA           |
 | `SSLServerVerification`         | Trust         | Certifikátu nelze důvěřovat          |
 
-## FMS UML diagram
-
-```plantuml
-@startuml
-
-skinparam shadowing false
-skinparam StateBackgroundColor #62bdf1ff
-skinparam StateBorderColor #2700d3ff
-skinparam StateFontName Helvetica
-
-state Error #dd1212ff: <color:white>Chyba</color>
-state Done #12dd12ff: <color:white>Hotovo</color>
-
-' Cluster 1
-state "Prepare Logs" as Preparation {
-   state FindHome
-   state LocateLogs
-   state ReadPath
-   state ZipLogs
-   
-   FindHome --> LocateLogs : HomeSet
-   LocateLogs --> ReadPath : LogsPathSet
-   ReadPath --> ZipLogs : LogsOk
-}
-
-' Cluster 2
-state "Upload to Server" as Networking {
-   state Preflight
-   state Transport
-   state ServerResponse
-   state RetryPolicy
-   
-   Preflight --> Transport : Connected
-   Transport --> ServerResponse : UploadOK
-   
-   ' Force directions
-   Transport -down-> RetryPolicy : ErrConnection\nErrTimeout\nErrRead\nErrWrite
-   ServerResponse -down-> RetryPolicy : ErrServer
-   
-   RetryPolicy -up-> Preflight : Reconnect
-}
-
-[*] --> Idle
-Idle --> FindHome : Start
-
-' Connect clusters
-ZipLogs --> Preflight : ZipOK
-
-' Success
-ServerResponse --> Done : HTTP_OK
-
-' Error states
-' Používáme || pro sloučení šipek (PlantUML vylepšení)
-FindHome --> U : HomeNotSet
-LocateLogs --> U : LogsPathNotSet
-ReadPath --> U : NoReadingRights
-ZipLogs --> U : ZipFailed / CantCreate
-Preflight --> U : SSL / TLS Errors
-ServerResponse --> U : ErrClient
-
-U --> Error
-
-@enduml
-```

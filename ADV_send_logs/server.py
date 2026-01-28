@@ -1,5 +1,5 @@
 from flask import Flask, request
-import os
+import time
 
 app = Flask(__name__)
 
@@ -13,7 +13,7 @@ def receive_log():
         f.write(data)
 
     # os._exit(1) # to test Error::Read
-    # os.wait(5)
+    # time.sleep(5) # testing timeout
     # return {"Bad request": 400}
     return {"status": "ok"}
 

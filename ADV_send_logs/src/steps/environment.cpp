@@ -14,7 +14,6 @@ Event handleFindHome(Context& ctx) {
     return Event::HomeSet;
 }
 
-
 Event handleLocateLogs(Context& ctx) {
 #ifdef _WIN32
 

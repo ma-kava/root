@@ -11,8 +11,8 @@ Context::Context(const std::string& serverUrl,
                  uint16_t port,
                  const std::string& path,
                  fs::path outputZip,
-                 uint8_t timeout,
-                 uint8_t n_reconnect)
+                 time_t timeout,
+                 uint16_t n_reconnect)
     : zipPath(std::move(outputZip)),
       uploader(serverUrl, port, path, timeout),
       zipCleaner(zipPath),

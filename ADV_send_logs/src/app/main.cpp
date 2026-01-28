@@ -21,13 +21,15 @@ namespace fs = std::filesystem;
 
 int main() {
     fs::path outputZip = "logs_dir.zip";
-    Context ctx = Context("127.0.0.1", 5000, "/log"/* init LogUploader */, outputZip, 1);
+    Context ctx = Context("127.0.0.1", 5000, "/log"/* init LogUploader */, outputZip, 3, 3);
     State state = State::Idle;
     Event ev = Event::Start;
 
     while (state != State::Done && state != State::Error) {
         State next = transition(state, ev);
+        #ifdef DEBUG
         log_fsm(state, ev, next);
+        #endif
         state = next;
 
         switch (state)

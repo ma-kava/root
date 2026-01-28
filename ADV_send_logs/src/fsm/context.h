@@ -13,8 +13,8 @@ public:
             uint16_t port,
             const std::string& path,
             fs::path outputZip,
-            uint8_t timeout = 5,
-            uint8_t n_reconnect = 3);
+            time_t timeout = 5,
+            uint16_t n_reconnect = 3);
 
     bool is_reconnect_count_limit_reached();
     void increment_reconnect_counter();

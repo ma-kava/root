@@ -19,7 +19,6 @@ State transition(State s, Event e) {
         case State::ReadPath:
             if (e == Event::LogsOK) return State::ZipLogs;
             if (e == Event::NoReadRights) return State::Error;
-            if (e == Event::LogsNotFound) return State::Error; // logsPath = "" TODO: this event is probably redundant 
             break;
 
         case State::ZipLogs:
@@ -50,6 +49,7 @@ State transition(State s, Event e) {
         
         case State::RetryPolicy:
             if (e == Event::Reconnect) return State::UploadToServer;
+            if (e == Event::Abort) return State::Error;
             break;
 
         default:

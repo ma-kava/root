@@ -80,3 +80,9 @@ bool zipDir(fs::path& sourceDir, fs::path& outputZip, bool verbose) {
 
     return true;
 }
+
+bool env_or_default(const char* variable, std::string& set_val, std::string default_val) {
+    const char* received = std::getenv(variable);
+    set_val = received ? std::string(received) : default_val;
+    return received != nullptr ? true : false;
+}

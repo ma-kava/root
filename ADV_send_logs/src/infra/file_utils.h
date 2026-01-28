@@ -18,3 +18,4 @@ bool is_zip_ready(const fs::path& dir);
 fs::path get_home_path();
 fs::path findFolder(const std::vector<fs::path>& locations, const std::string& folderName);
 bool zipDir(fs::path& sourceDir, fs::path& outputZip, bool verbose);
+bool env_or_default(const char* variable, std::string& set_val, std::string default_val);

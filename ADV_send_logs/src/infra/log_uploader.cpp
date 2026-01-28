@@ -7,7 +7,7 @@
 
 // #define CPPHTTPLIB_OPENSSL_SUPPORT (defined in CMakeLists.txt)
 
-LogUploader::LogUploader(const std::string& serverUrl, uint16_t port, const std::string& path, uint8_t timeout) {
+LogUploader::LogUploader(const std::string& serverUrl, uint16_t port, const std::string& path, time_t timeout) {
     serverUrl_ = serverUrl;
     port_ = port;
     path_ = path;

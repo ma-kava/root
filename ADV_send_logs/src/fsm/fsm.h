@@ -27,7 +27,6 @@ enum class Event {
     /*--- ReadPath ---*/
     LogsOK,
     NoReadRights,
-    LogsNotFound,
     /*--- ZipLogs ---*/
     ZipOk,
     ZipFailed,
@@ -46,6 +45,7 @@ enum class Event {
     ErrWrite,
     /*--- RetryPolicy ---*/
     Reconnect,
+    Abort,
     /*--- Connection undefined ---*/
     ErrUnknown,
     /*--- ServerResponse ---*/
@@ -90,7 +90,6 @@ inline const char* to_string(Event event)
 
         case Event::LogsOK:               return "LogsOK";
         case Event::NoReadRights:         return "NoReadRights";
-        case Event::LogsNotFound:         return "LogsNotFound";
 
         case Event::ZipOk:                return "ZipOk";
         case Event::ZipFailed:            return "ZipFailed";
@@ -109,6 +108,7 @@ inline const char* to_string(Event event)
         case Event::ErrWrite:             return "ErrWrite";
 
         case Event::Reconnect:            return "Reconnect";
+        case Event::Abort:                return "Abort";
 
         case Event::HTTP_OK:              return "HTTP_OK";
         case Event::ErrClient:            return "ErrClient";

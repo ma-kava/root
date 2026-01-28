@@ -10,7 +10,7 @@ using Callback = std::function<void(bool success, const std::string& msg)>;
 class LogUploader {
 public:
 
-    LogUploader(const std::string& serverUrl, uint16_t port, const std::string& path, uint8_t timeout);
+    LogUploader(const std::string& serverUrl, uint16_t port, const std::string& path, time_t timeout);
     httplib::Result sendMessage(const std::string& message, Callback cb = nullptr);
 
 private:
