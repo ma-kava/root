@@ -33,29 +33,54 @@ set(SOURCE_FILES
 # ---------------------------------------------------------
 set(MY_OPENSSL_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/openssl3.0")
 
-set(OPENSSL_ROOT_DIR "${MY_OPENSSL_ROOT}" CACHE PATH "OpenSSL root dir")
-set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "Use static OpenSSL")
+if(WIN32)
+    set(OPENSSL_PLATFORM windows)
+elseif(APPLE)
+    set(OPENSSL_PLATFORM macos)
+elseif(UNIX)
+    set(OPENSSL_PLATFORM linux)
+endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(OPENSSL_LIB_DIR "${MY_OPENSSL_ROOT}/linux/lib")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set(OPENSSL_LIB_DIR "${MY_OPENSSL_ROOT}/macos/lib")
+set(OPENSSL_ROOT_DIR "${MY_OPENSSL_ROOT}" CACHE PATH "OpenSSL root dir")
+
+if(WIN32)
+    # Windows = shared OpenSSL
+    set(OPENSSL_USE_STATIC_LIBS OFF CACHE BOOL "Use static OpenSSL" FORCE)
+    set(OPENSSL_LIB_DIR "${MY_OPENSSL_ROOT}/windows/lib")
+
+    set(OPENSSL_SSL_LIBRARY
+        "${OPENSSL_LIB_DIR}/libssl.lib"
+        CACHE FILEPATH "OpenSSL SSL library"
+    )
+    set(OPENSSL_CRYPTO_LIBRARY
+        "${OPENSSL_LIB_DIR}/libcrypto.lib"
+        CACHE FILEPATH "OpenSSL Crypto library"
+    )
+
+else()
+    # Linux + macOS = static OpenSSL
+    set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "Use static OpenSSL" FORCE)
+
+    if(APPLE)
+        set(OPENSSL_LIB_DIR "${MY_OPENSSL_ROOT}/macos/lib")
+    else()
+        set(OPENSSL_LIB_DIR "${MY_OPENSSL_ROOT}/linux/lib")
+    endif()
+
+    set(OPENSSL_SSL_LIBRARY
+        "${OPENSSL_LIB_DIR}/libssl.a"
+        CACHE FILEPATH "OpenSSL SSL library"
+    )
+    set(OPENSSL_CRYPTO_LIBRARY
+        "${OPENSSL_LIB_DIR}/libcrypto.a"
+        CACHE FILEPATH "OpenSSL Crypto library"
+    )
 endif()
 
 # setting the cache is important for `find_package(OpenSSL)` in libzippp
 set(OPENSSL_INCLUDE_DIR
     "${MY_OPENSSL_ROOT}/include"
     CACHE PATH "OpenSSL include dir"
-)
-
-set(OPENSSL_SSL_LIBRARY
-    "${OPENSSL_LIB_DIR}/libssl.a"
-    CACHE FILEPATH "OpenSSL SSL library"
-)
-
-set(OPENSSL_CRYPTO_LIBRARY
-    "${OPENSSL_LIB_DIR}/libcrypto.a"
-    CACHE FILEPATH "OpenSSL Crypto library"
 )
 
 find_package(OpenSSL REQUIRED)
