@@ -1,6 +1,7 @@
 #include "infra/log_uploader.h"
 
 #include <string>
+#include <vector>
 #include <cstdint>
 #include <functional>
 #include <httplib.h>
@@ -28,6 +29,27 @@ httplib::Result LogUploader::sendMessage(const std::string& message, Callback cb
     cli.set_write_timeout(timeout_);
 
     httplib::Result res = cli.Post(path_, message, "text/plain");
+    
+    return res;
+}
+
+httplib::Result LogUploader::sendBinary(std::vector<char> buffer) {
+    // HTTP Post
+    httplib::SSLClient cli(serverUrl_, port_);
+
+    cli.set_ca_cert_path("server.crt"); // client now trusts server.crt certificate
+    cli.enable_server_certificate_verification(false);
+    // cli.enable_server_hostname_verification(false);
+
+    cli.set_connection_timeout(timeout_); // seconds
+    cli.set_read_timeout(timeout_);
+    cli.set_write_timeout(timeout_);
+
+    httplib::UploadFormDataItems items = {
+        { "file3", std::string(buffer.data(), buffer.size()), "logs.zip", "application/octet-stream" },
+    };
+
+    auto res = cli.Post("/endpoint", items);
     
     return res;
 }

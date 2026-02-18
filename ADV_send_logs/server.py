@@ -9,7 +9,7 @@ def receive_log():
     data = request.data
     print(f"Received {len(data)} bytes.")
 
-    with open('received_archive.txt', 'wb') as f:
+    with open('received_archive.zip', 'wb') as f:
         f.write(data)
 
     # os._exit(1) # to test Error::Read

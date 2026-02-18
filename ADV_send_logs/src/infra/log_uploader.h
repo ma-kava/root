@@ -12,6 +12,7 @@ public:
 
     LogUploader(const std::string& serverUrl, uint16_t port, const std::string& path, time_t timeout);
     httplib::Result sendMessage(const std::string& message, Callback cb = nullptr);
+    httplib::Result sendBinary(std::vector<char> buffer);
 
 private:
     std::string serverUrl_;
