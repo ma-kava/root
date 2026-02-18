@@ -133,3 +133,40 @@ if(WIN32)
 elseif(UNIX AND NOT APPLE)
     target_link_libraries(log_uploader PRIVATE pthread dl)
 endif()
+
+# ---------------------------------------------------------
+# 8. Test Executable
+# ---------------------------------------------------------
+add_executable(test_log_uploader src/tests/test_log_uploader.cpp)
+
+target_include_directories(test_log_uploader PRIVATE
+    src
+    3rdparty/httplib
+    ${OPENSSL_INCLUDE_DIR}
+    3rdparty/miniz
+)
+
+target_link_libraries(test_log_uploader PRIVATE
+    OpenSSL::SSL
+    OpenSSL::Crypto
+    miniz
+)
+
+if(WIN32)
+    target_link_libraries(test_log_uploader PRIVATE ws2_32 crypt32)
+elseif(UNIX AND NOT APPLE)
+    target_link_libraries(test_log_uploader PRIVATE pthread dl)
+endif()
+
+# We need to link the object files of the library classes we are testing
+# Since we didn't create a library target for the core logic (just sources in log_uploader executable),
+# we need to reference them again or create a library target. 
+# For simplicity, I'll add the necessary source files here.
+target_sources(test_log_uploader PRIVATE
+    src/infra/log_uploader.cpp
+    src/infra/file_utils.cpp
+)
+
+target_compile_definitions(test_log_uploader PRIVATE
+    CPPHTTPLIB_OPENSSL_SUPPORT
+)
