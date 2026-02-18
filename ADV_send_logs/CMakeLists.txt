@@ -89,9 +89,10 @@ message(STATUS "OpenSSL Include: ${OPENSSL_INCLUDE_DIR}")
 message(STATUS "OpenSSL Libs: ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY}")
 
 # ---------------------------------------------------------
-# 3. Libzippp
+# 3. Libzippp and Miniz
 # ---------------------------------------------------------
-add_subdirectory(3rdparty/libzippp)
+# add_subdirectory(3rdparty/libzippp)
+add_subdirectory(3rdparty/miniz)
 
 # ---------------------------------------------------------
 # 4. Executable target
@@ -105,7 +106,8 @@ target_include_directories(log_uploader PRIVATE
     src
     3rdparty/httplib
     ${OPENSSL_INCLUDE_DIR}
-    3rdparty/libzippp/src
+    # 3rdparty/libzippp/src
+    3rdparty/miniz
 )
 
 # ---------------------------------------------------------
@@ -122,7 +124,8 @@ target_link_libraries(log_uploader PRIVATE
     OpenSSL::SSL        # httplib needs these to support SSL
     OpenSSL::Crypto
     
-    libzippp
+    # libzippp
+    miniz
 )
 
 if(WIN32)

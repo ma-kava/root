@@ -3,10 +3,10 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <libzippp.h>
-#include <sys/stat.h> // for file size
+// #include <sys/stat.h> // for file size
+#include <miniz.h>
+#include <algorithm>
 
-using namespace libzippp;
 namespace fs = std::filesystem;
 
 FileDeleter::~FileDeleter() {
@@ -42,43 +42,48 @@ fs::path findFolder(const std::vector<fs::path>& locations, const std::string& f
 }
 
 bool zipDir(fs::path& sourceDir, fs::path& outputZip, bool verbose) {
-    // create and open zip 
-    ZipArchive zf(outputZip);
-    if (!zf.open(ZipArchive::New)) {
-        std::cerr << "Error: archive cannot be created " << outputZip << std::endl;
+    if (!fs::exists(sourceDir) || !fs::is_directory(sourceDir)) {
+        if (verbose) std::cerr << "Source directory does not exist or is not a directory: " << sourceDir << std::endl;
         return false;
     }
 
+    mz_zip_archive zip_archive;
+    mz_zip_zero_struct(&zip_archive);
+
+    if (!mz_zip_writer_init_file(&zip_archive, outputZip.string().c_str(), 0)) {
+        if (verbose) std::cerr << "Failed to initialize zip writer for: " << outputZip << std::endl;
+        return false;
+    }
+
+    bool success = true;
     for (const auto& entry : fs::recursive_directory_iterator(sourceDir)) {
-        if (verbose)
-            std::cout << entry.path().string() << '\n';
-        
         if (entry.is_regular_file()) {
-            std::string filePath = entry.path().string();
-            
-            // realitve path only
+            std::string fullPath = fs::absolute(entry.path()).string();
             std::string nameInZip = fs::relative(entry.path(), sourceDir).string();
-
-#ifdef _WIN64
-            // zip standard requires '/' even on windows
+            
+            // Normalize path separators to forward slash for ZIP compatibility
             std::replace(nameInZip.begin(), nameInZip.end(), '\\', '/');
-#endif
 
-            if (!zf.addFile(nameInZip, filePath) && verbose) {
-                std::cerr << "Warning: Failed to add " << nameInZip << std::endl;
+            if (!mz_zip_writer_add_file(&zip_archive, nameInZip.c_str(), fullPath.c_str(), NULL, 0, MZ_DEFAULT_COMPRESSION)) {
+                if (verbose) std::cerr << "Failed to add file: " << nameInZip << " (Path: " << fullPath << ")" << std::endl;
+                success = false;
             } else if (verbose) {
                 std::cout << "Added: " << nameInZip << std::endl;
             }
         }
     }
 
-    int result = zf.close();
-    if (result != LIBZIPPP_OK) {
-        std::cerr << "Error during archiving. Code: " << result << std::endl;
-        return false;
+    if (!mz_zip_writer_finalize_archive(&zip_archive)) {
+        if (verbose) std::cerr << "Failed to finalize archive" << std::endl;
+        success = false;
     }
 
-    return true;
+    if (!mz_zip_writer_end(&zip_archive)) {
+        if (verbose) std::cerr << "Failed to end zip writer" << std::endl;
+        success = false;
+    }
+
+    return success;
 }
 
 bool env_or_default(const char* variable, std::string& set_val, std::string default_val) {
