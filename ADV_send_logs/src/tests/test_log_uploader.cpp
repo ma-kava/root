@@ -1,6 +1,4 @@
-#include <windows.h>
 #include <string>
-
 #include "infra/log_uploader.h"
 #include "infra/file_utils.h"
 #include <httplib.h>
