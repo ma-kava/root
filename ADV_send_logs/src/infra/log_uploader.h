@@ -18,5 +18,5 @@ private:
     std::string serverUrl_;
     uint16_t port_;
     std::string path_;
-    u_int8_t timeout_;
+    uint8_t timeout_;
 };

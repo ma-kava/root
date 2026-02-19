@@ -7,7 +7,7 @@
 Event handleFindHome(Context& ctx) {
     fs::path path = get_home_path();
 
-    if (path.c_str() == "") {
+    if (path.empty()) {
         return Event::HomeNotSet;
     }
     ctx.home = path;
@@ -16,7 +16,9 @@ Event handleFindHome(Context& ctx) {
 
 Event handleLocateLogs(Context& ctx) {
 #ifdef _WIN32
-
+    std::vector<fs::path> searchPaths = { 
+        get_home_path()
+    };
 #else
     std::vector<fs::path> searchPaths = {
         fs::path(ctx.home),

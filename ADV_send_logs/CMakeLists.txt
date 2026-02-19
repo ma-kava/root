@@ -32,61 +32,54 @@ set(SOURCE_FILES
 # 2. OpenSSL (vendored)
 # ---------------------------------------------------------
 set(MY_OPENSSL_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/openssl3.0")
+set(OPENSSL_INCLUDE_DIR "${MY_OPENSSL_ROOT}/include")
 
+# Definujeme cesty ručně, abychom se vyhnuli detekci platformy
 if(WIN32)
-    set(OPENSSL_PLATFORM windows)
-elseif(APPLE)
-    set(OPENSSL_PLATFORM macos)
-elseif(UNIX)
-    set(OPENSSL_PLATFORM linux)
-endif()
-
-set(OPENSSL_ROOT_DIR "${MY_OPENSSL_ROOT}" CACHE PATH "OpenSSL root dir")
-
-if(WIN32)
-    # Windows = shared OpenSSL
-    set(OPENSSL_USE_STATIC_LIBS OFF CACHE BOOL "Use static OpenSSL" FORCE)
-    set(OPENSSL_LIB_DIR "${MY_OPENSSL_ROOT}/windows/lib")
-
-    set(OPENSSL_SSL_LIBRARY
-        "${OPENSSL_LIB_DIR}/libssl.lib"
-        CACHE FILEPATH "OpenSSL SSL library"
-    )
-    set(OPENSSL_CRYPTO_LIBRARY
-        "${OPENSSL_LIB_DIR}/libcrypto.lib"
-        CACHE FILEPATH "OpenSSL Crypto library"
-    )
-
+    set(OPENSSL_LIB_DIR "${MY_OPENSSL_ROOT}/win64")
+    set(LIB_SSL_PATH "${OPENSSL_LIB_DIR}/libssl.lib")
+    set(LIB_CRYPTO_PATH "${OPENSSL_LIB_DIR}/libcrypto.lib")
 else()
-    # Linux + macOS = static OpenSSL
-    set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "Use static OpenSSL" FORCE)
-
+    # Linux / Mac logika zůstává stejná...
     if(APPLE)
         set(OPENSSL_LIB_DIR "${MY_OPENSSL_ROOT}/macos/lib")
     else()
         set(OPENSSL_LIB_DIR "${MY_OPENSSL_ROOT}/linux/lib")
     endif()
+    set(LIB_SSL_PATH "${OPENSSL_LIB_DIR}/libssl.a")
+    set(LIB_CRYPTO_PATH "${OPENSSL_LIB_DIR}/libcrypto.a")
+endif()
 
-    set(OPENSSL_SSL_LIBRARY
-        "${OPENSSL_LIB_DIR}/libssl.a"
-        CACHE FILEPATH "OpenSSL SSL library"
-    )
-    set(OPENSSL_CRYPTO_LIBRARY
-        "${OPENSSL_LIB_DIR}/libcrypto.a"
-        CACHE FILEPATH "OpenSSL Crypto library"
+message(STATUS "OpenSSL Include: ${OPENSSL_INCLUDE_DIR}")
+message(STATUS "OpenSSL Libs: ${LIB_SSL_PATH} ${LIB_CRYPTO_PATH}")
+
+# --- ZMĚNA ZDE: Místo find_package vytvoříme IMPORTED cíle ručně ---
+
+# Vytvoříme cíl OpenSSL::Crypto
+if(NOT TARGET OpenSSL::Crypto)
+    add_library(OpenSSL::Crypto UNKNOWN IMPORTED)
+    set_target_properties(OpenSSL::Crypto PROPERTIES
+        IMPORTED_LOCATION "${LIB_CRYPTO_PATH}"
+        INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}"
     )
 endif()
 
-# setting the cache is important for `find_package(OpenSSL)` in libzippp
-set(OPENSSL_INCLUDE_DIR
-    "${MY_OPENSSL_ROOT}/include"
-    CACHE PATH "OpenSSL include dir"
-)
+# Vytvoříme cíl OpenSSL::SSL
+if(NOT TARGET OpenSSL::SSL)
+    add_library(OpenSSL::SSL UNKNOWN IMPORTED)
+    set_target_properties(OpenSSL::SSL PROPERTIES
+        IMPORTED_LOCATION "${LIB_SSL_PATH}"
+        INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}"
+    )
+    # SSL závisí na Crypto
+    target_link_libraries(OpenSSL::SSL INTERFACE OpenSSL::Crypto)
+endif()
 
-find_package(OpenSSL REQUIRED)
-
-message(STATUS "OpenSSL Include: ${OPENSSL_INCLUDE_DIR}")
-message(STATUS "OpenSSL Libs: ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY}")
+# Nastavíme proměnné, které by normálně nastavil find_package
+# (pro případ, že je potřebuje libzippp nebo jiné podmoduly)
+set(OPENSSL_FOUND ON CACHE BOOL "" FORCE)
+set(OPENSSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto CACHE INTERNAL "")
+set(OPENSSL_INCLUDE_DIR "${OPENSSL_INCLUDE_DIR}" CACHE PATH "" FORCE)
 
 # ---------------------------------------------------------
 # 3. Libzippp and Miniz
@@ -117,6 +110,10 @@ target_compile_definitions(log_uploader PRIVATE
     CPPHTTPLIB_OPENSSL_SUPPORT
 )
 
+target_compile_definitions(log_uploader PRIVATE
+    CPPHTTPLIB_OPENSSL_SUPPORT
+    $<$<BOOL:${WIN32}>:_WIN32_WINNT=0x0A00> # Tohle vynutí Windows 10 API
+)
 # ---------------------------------------------------------
 # 7. Link libraries
 # ---------------------------------------------------------
@@ -169,4 +166,9 @@ target_sources(test_log_uploader PRIVATE
 
 target_compile_definitions(test_log_uploader PRIVATE
     CPPHTTPLIB_OPENSSL_SUPPORT
+)
+
+target_compile_definitions(test_log_uploader PRIVATE
+    CPPHTTPLIB_OPENSSL_SUPPORT
+    $<$<BOOL:${WIN32}>:_WIN32_WINNT=0x0A00>
 )

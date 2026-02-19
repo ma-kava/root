@@ -1,3 +1,5 @@
+#include <windows.h>
+#include <string>
 
 #include "infra/log_uploader.h"
 #include "infra/file_utils.h"
@@ -52,8 +54,11 @@ int main() {
     std::cout << "Zip created successfully." << std::endl;
 
     // 3. Read Zip to Buffer
-    std::ifstream zipIn(zipDest, std::ios::binary);
-    std::vector<char> zipBuffer((std::istreambuf_iterator<char>(zipIn)), std::istreambuf_iterator<char>());
+    std::vector<char> zipBuffer;
+    {
+        std::ifstream zipIn(zipDest, std::ios::binary);
+        zipBuffer.assign((std::istreambuf_iterator<char>(zipIn)), std::istreambuf_iterator<char>());
+    }
     std::cout << "Read " << zipBuffer.size() << " bytes from zip file." << std::endl;
 
     // 4. Setup SSL Server
@@ -117,8 +122,29 @@ int main() {
     // 6. Verify and Cleanup
     svr.stop();
     serverThread.join();
-    cleanupTestFiles();
+    
+    std::string s = fs::path(ZIP_FILE).string();
+    int _max_tries = 50;
+    int tries = 0;
+    bool success = false;
 
+    while (tries < _max_tries) {
+        try {
+            cleanupTestFiles();
+            success = true;
+            break;
+        } catch (const std::exception& e) {
+            tries++;
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        }
+    }
+
+    if (!success) {
+        std::cerr << "Failed to cleanup zip test file after " << _max_tries 
+                  << " tries." << std::endl;
+        return 1;
+    }
+        
     if (uploadReceived) {
         std::cout << "TEST PASSED: Server received correctly sized payload." << std::endl;
         return 0;

@@ -5,3 +5,5 @@ openssl req -x509 -nodes -days 365 \
 -keyout server.key \
 -out server.crt \
 -config openssl.cnf
+
+# openssl req -x509 -nodes -days 365 -newkey rsa:4096 -keyout server.key -out server.crt -config openssl.cnf

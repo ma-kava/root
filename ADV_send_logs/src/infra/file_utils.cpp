@@ -24,7 +24,7 @@ bool is_zip_ready(const fs::path& dir) {
 fs::path get_home_path() {
 #ifdef _WIN32
     std::string user_profile = std::getenv("USERPROFILE");
-    return user_profile ? fs::path(user_profile) : fs::path("");
+    return !user_profile.empty() ? fs::path(user_profile) : fs::path("");
 #else
     std::string home = std::getenv("HOME");
     return fs::exists(home) ? fs::path(home) : fs::path("");
