@@ -18,7 +18,7 @@ LogUploader::LogUploader(const std::string& serverUrl, uint16_t port, const std:
 // httplib uses 'blocking' socket I/O
 httplib::Result LogUploader::sendMessage(const std::string& message, Callback cb) {
     // HTTPS
-    httplib::SSLClient cli(/*"https:" + */serverUrl_, port_);
+    httplib::Client cli(/*"https:" + */serverUrl_ + std::to_string(port_));
     
     cli.set_ca_cert_path("server.crt"); // client now trusts server.crt certificate
     cli.enable_server_certificate_verification(false);
@@ -33,23 +33,37 @@ httplib::Result LogUploader::sendMessage(const std::string& message, Callback cb
     return res;
 }
 
-httplib::Result LogUploader::sendBinary(std::vector<char> buffer) {
-    // HTTP Post
-    httplib::SSLClient cli(serverUrl_, port_);
+httplib::Result LogUploader::sendPlainData(const std::string& zipPath) {
+    httplib::Client cli("https://" + serverUrl_ + ":" + std::to_string(port_));
 
-    cli.set_ca_cert_path("server.crt"); // client now trusts server.crt certificate
+    cli.set_ca_cert_path("server.crt");
     cli.enable_server_certificate_verification(false);
     // cli.enable_server_hostname_verification(false);
 
-    cli.set_connection_timeout(timeout_); // seconds
+    cli.set_connection_timeout(timeout_);
     cli.set_read_timeout(timeout_);
     cli.set_write_timeout(timeout_);
 
-    httplib::UploadFormDataItems items = {
-        { "file3", std::string(buffer.data(), buffer.size()), "logs.zip", "application/octet-stream" },
+    // std::ifstream file(zipPath, std::ios::binary);
+    // if (!file.is_open()) {
+    //     std::cerr << "Error opening file for reading." << std::endl;
+    //     return httplib::Result(nullptr, httplib::Error::Unknown); 
+    // }
+
+    httplib::FormDataProviderItems items;
+    httplib::FormDataProvider provider; // ensures the file is sent in chunks (saves RAM)
+    
+    std::string name = "pixet_logs_file"; // Form field name
+    std::string filepath = zipPath;       // Local file path
+    std::string filename = "logs.zip";    // Filename in the form data
+    std::string content_type = "application/octet-stream";
+    provider = httplib::make_file_provider(name, filepath, filename, content_type);
+    
+    items.push_back(provider);
+
+    httplib::UploadFormDataItems fields = {
+        {"user_id", "123", "", ""}
     };
 
-    auto res = cli.Post("/endpoint", items);
-    
-    return res;
+    return cli.Post(path_, {}, fields, items); 
 }

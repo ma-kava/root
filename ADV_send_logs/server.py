@@ -6,15 +6,26 @@ app = Flask(__name__)
 @app.route('/log', methods=['POST', 'PUT'])
 def receive_log():
     print("=== Received ===")
-    data = request.data
-    print(f"Received {len(data)} bytes.")
+    
+    # Handle multipart/form-data
+    if request.mimetype == 'multipart/form-data':
+        if 'user_id' in request.form:
+            print(f"User ID: {request.form['user_id']}")
+            
+        if 'pixet_logs_file' in request.files:
+            file = request.files['pixet_logs_file']
+            print(f"Received file: {file.filename}")
+            file.save(f'customer_{request.form["user_id"]}_{file.filename}')
+        else:
+            print("No file named 'pixet_logs_file' found in form data.")
+            return {"Bad request": 400}, 400
+    else:
+        # Fallback for plain data
+        data = request.data
+        print(f"Received {len(data)} bytes of raw data.")
+        with open('received_archive.zip', 'wb') as f:
+            f.write(data)
 
-    with open('received_archive.zip', 'wb') as f:
-        f.write(data)
-
-    # os._exit(1) # to test Error::Read
-    # time.sleep(5) # testing timeout
-    # return {"Bad request": 400}
     return {"status": "ok"}
 
 if __name__ == '__main__':

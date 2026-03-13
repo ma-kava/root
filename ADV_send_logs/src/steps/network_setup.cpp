@@ -9,23 +9,8 @@
 
 Event handleUploadToServer(Context& ctx) {
     auto zipPath = ctx.zipPath.string();
-    
-    // load the zip file to buffer
-    std::cout << "Loading the zip to buffer" << std::endl;
-    std::ifstream file(zipPath, std::ios::binary);
-    if (!file) {
-        std::cerr << "Error opening file for reading.";
-        // TODO: add Event signaling this error
-    }
-    // read file size
-    file.seekg(0, std::ios::end);
-    size_t size = static_cast<size_t>(file.tellg());
-    file.seekg(0, std::ios::beg);
-    // load the zip into memory
-    std::vector<char> buffer(size);
-    file.read(buffer.data(), size);
 
-    httplib::Result res = ctx.uploader.sendBinary(buffer);
+    httplib::Result res = ctx.uploader.sendPlainData(zipPath);
     Event ev;
 
     if (!res) {

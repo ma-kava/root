@@ -5,9 +5,15 @@
 /lib64
 /include/
 
+#self-signed certificate & key
+*.crt
+*.key
+
 # Ignore unnecessary files
 /*.zip
 /*.json
+/report\ for\ me
+ROADMAP.md
 
 # Ignore third-party libraries
 /3rdparty/

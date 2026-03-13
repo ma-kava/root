@@ -1,6 +1,7 @@
 #include <string>
 #include "infra/log_uploader.h"
 #include "infra/file_utils.h"
+#include <functional>
 #include <httplib.h>
 #include <iostream>
 #include <thread>
@@ -51,13 +52,11 @@ int main() {
     }
     std::cout << "Zip created successfully." << std::endl;
 
-    // 3. Read Zip to Buffer
-    std::vector<char> zipBuffer;
-    {
-        std::ifstream zipIn(zipDest, std::ios::binary);
-        zipBuffer.assign((std::istreambuf_iterator<char>(zipIn)), std::istreambuf_iterator<char>());
-    }
-    std::cout << "Read " << zipBuffer.size() << " bytes from zip file." << std::endl;
+    // 3. read file size
+    std::ifstream zipIn(zipDest, std::ios::binary);
+    zipIn.seekg(0, std::ios::end);
+    size_t zipFileSize = static_cast<size_t>(zipIn.tellg());
+    zipIn.seekg(0, std::ios::beg);
 
     // 4. Setup SSL Server
     // Note: This requires server.crt and server.key to be present in the working directory
@@ -74,24 +73,28 @@ int main() {
 
     std::atomic<bool> uploadReceived{false};
 
-    svr.Post("/endpoint", [&](const httplib::Request& req, httplib::Response& res) {
-        std::cout << "Server received POST /endpoint" << std::endl;
-        if (req.form.has_file("file3")) {
-            const auto& file = req.form.get_file("file3");
-            std::cout << "Received file: " << file.filename << ", content_type: " << file.content_type << ", size: " << file.content.size() << std::endl;
-            if (file.filename == "logs.zip" && file.content.size() == zipBuffer.size()) {
-                 uploadReceived = true;
-                 res.status = 200;
-                 res.set_content("Upload OK", "text/plain");
+    svr.Post("/endpoint", 
+        [&](const httplib::Request& req, httplib::Response& res) {
+            std::cout << "Server received POST /endpoint" << std::endl;
+            // Note: we check for "pixet_logs_file" since that's what the client seems to send
+            if (req.form.has_file("pixet_logs_file")) {
+                const auto& file = req.form.get_file("pixet_logs_file");
+                std::cout << "Received file: " << file.filename << ", content_type: " << file.content_type << ", size: " << file.content.length() << std::endl;
+                
+                if (file.filename == "logs.zip" && file.content.length() == zipFileSize) {
+                    uploadReceived = true;
+                    res.status = 200;
+                    res.set_content("Upload OK", "text/plain");
+                } else {
+                    std::cerr << "File mismatch! Name: " << file.filename << ", Size: " << file.content.length() << " (Expected size: " << zipFileSize << ")" << std::endl;
+                    res.status = 400;
+                }
             } else {
-                std::cerr << "File mismatch!" << std::endl;
+                std::cerr << "No file named 'pixet_logs_file' in request!" << std::endl;
                 res.status = 400;
             }
-        } else {
-            std::cerr << "No file named 'file3' in request!" << std::endl;
-            res.status = 400;
         }
-    });
+    );
 
     int port = 9999;
     std::thread serverThread([&]() {
@@ -107,14 +110,19 @@ int main() {
     // LogUploader(url, port, path, timeout)
     // Note: LogUploader takes "serverUrl" which behaves like hostname in the client constructor
     // but the implementation does: httplib::SSLClient cli(serverUrl_, port_);
-    // so we pass "localhost"
+    // so we pass "localhost"p' in re
     LogUploader uploader("localhost", port, "/endpoint", 5); 
-    auto res = uploader.sendBinary(zipBuffer);
+    const std::string zipPath = zipDest.string();
+    auto res = uploader.sendPlainData(zipPath);
 
     if (res && res->status == 200) {
         std::cout << "Uploader returned success (200)." << std::endl;
     } else {
         std::cerr << "Uploader failed or returned non-200. Error: " << (res ? std::to_string(res->status) : "Connection failed") << std::endl;
+        std::cout << "Error: " << httplib::to_string(res.error()) << std::endl;
+
+        // const auto err = res.error();
+        // print_httplib_error(err);
     }
 
     // 6. Verify and Cleanup
